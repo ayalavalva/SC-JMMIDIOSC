@@ -1,4 +1,4 @@
-JMIntechEN16 : JIntechControllers {
+JMIntechEN16 : JMIntechControllers {
     var <>startCC;
 
     *new { |midiChannel=0, startCC=32, oscServAddr="127.0.0.1", oscServPort=9000|

@@ -17,13 +17,13 @@ JMElementPotentiometer : JMMIDIElements {
     }
 
     midi14bitReceivers {
-        MIDIdef.cc("%_Pot%_msb".format(this.name, this.elementNumber), { |val|
+        MIDIdef.cc("%_PO%_msb".format(this.name, this.elementNumber), { |val|
             this.msbCCValue = val;
             this.msbUpdated = true;
             this.mappedCombinedMIDIValuetoControlBus;
         }, ccNum: this.msbCC, chan: this.midiChannel);
 
-        MIDIdef.cc("%_Pot%_lsb".format(this.name, this.elementNumber), { |val|
+        MIDIdef.cc("%_PO%_lsb".format(this.name, this.elementNumber), { |val|
             this.lsbCCValue = val;
             this.lsbUpdated = true;
             this.mappedCombinedMIDIValuetoControlBus;

@@ -23,7 +23,7 @@ JMElementButton : JMMIDIElements {
 
     mappedMIDIValuetoControlBus {
         var mappedValue = this.ccValue.linlin(0, 127, 0, 1);
-        this.controlBus.set(Lag.kr(mappedValue, 0.01));
+        this.controlBus.set(mappedValue);
         (this.name ++ (if (this.name == "Intech Studio PBF4") {" (" ++ this.deviceNumb ++ ")"} {""}) + "Button" + this.elementNumber + "MIDI Channel" + this.midiChannel + "CC" + this.cc ++ ":" + mappedValue).postln;
     }
 }

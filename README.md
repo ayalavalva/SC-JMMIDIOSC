@@ -1,6 +1,35 @@
 # JMMIDIOSC
 
-JMMIDIOSC is a SuperCollider extension that provides MIDI and OSC functionalities for controlling elements such as encoders and buttons.
+JMMIDIOSC is a SuperCollider extension that provides a set of classes for Intech Studio MIDI controllers (PO16, EN16, PBF4) to control MIDI elements such as potentiometers, encoders, faders and buttons with MIDI and OSC functionalities.
+
+## JMIntechControllers
+
+### Overview
+The `JMIntechControllers` class is an abstract superclass class which provides a set of methods and properties for handling MIDI and OSC communication.
+
+### Properties
+- `fullName`: The full name of the controller.
+- `shortName`: The short name of the controller.
+- `midiChannel`: The MIDI channel used for communication.
+- `oscServAddr`: The OSC server address.
+- `oscServPort`: The OSC server port.
+- `potCount`: The number of potentiometers.
+- `encCount`: The number of encoders.
+- `fadCount`: The number of faders.
+- `butCount`: The number of buttons.
+- `controlBusDict`: A dictionary that maps control bus keys to their corresponding control buses.
+- `deviceNumb`: The device number.
+
+### Methods
+- `*new(fullName, shortName, midiChannel, oscServAddr, oscServPort)`: Constructor method for creating a new `JMIntechControllers` instance.
+- `init(fullName, shortName, midiChannel, oscServAddr, oscServPort)`: Initialization method for setting the properties of the instance.
+- `buildElementsDict()`: Method for building the `controlBusDict` dictionary based on the number of elements (potentiometers, encoders, faders, buttons).
+- `controlBus(key)`: Method for retrieving the control bus associated with a given key.
+- `size()`: Method for getting the size of the `controlBusDict` dictionary.
+- `free()`: Method for freeing the control buses and decrementing the device number.
+
+### Usage
+To use the `JMIntechControllers` class, create an instance by calling the constructor method `*new` and pass the required parameters. Then, call the `buildElementsDict` method to build the control bus dictionary. You can access the control buses using the `controlBus` method and perform operations on them. Finally, when you're done using the instance, call the `free` method to free the control buses and decrement the device number.
 
 ## JOElementButton
 
@@ -21,7 +50,7 @@ The `JOElementButton` class represents a MIDI button element. It inherits from t
 
 ## JOOSCManager
 
-The `JOOSCManager` class provides OSC functionalities for sending OSC messages.
+The `JOOSCManager` class provides OSC functionalities for sending OSC messages to an OSC server.
 
 ### Properties
 
@@ -47,5 +76,3 @@ To use the JMMIDIOSC extension, follow these steps:
 6. Send OSC messages using the `send` method of `JOOSCManager`.
 
 For more information, refer to the SuperCollider documentation.
-
-}

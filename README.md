@@ -1,6 +1,6 @@
 # JMMIDIOSC
 
-JMMIDIOSC is a SuperCollider extension that provides a set of classes for Intech Studio MIDI controllers (PO16, EN16, PBF4) to control MIDI elements such as potentiometers, encoders, faders and buttons with MIDI and OSC functionalities.
+JMMIDIOSC is a SuperCollider extension that provides a set of classes to use Intech Studio MIDI controllers (PO16, EN16, PBF4) and send their MIDI date via OSC protocol, and control external MIDI devices (MIDI synths).
 
 ## Class tree
 
@@ -15,40 +15,47 @@ JMMIDIOSC is a SuperCollider extension that provides a set of classes for Intech
 │ ├── JMElementFader.sc # Fader class
 │ └── JMElementButton.sc # Button class
 └── JMOSCManager.sc # OSC manager class
+
+├── JMMIDIDevices.sc # Abstract superclass for MIDI devices
+└ └─── JMKorgVolcaDrum.sc # Korg Volca Drum class
 ```
 
 ## JMIntechControllers
 
 ### Overview
-The `JMIntechControllers` class is an abstract superclass class which provides a set of methods and properties for handling MIDI and OSC communication.
+
+The `JMIntechControllers` class is an abstract superclass class which provides a set of methods and properties for controlling Intech Studio MIDI controllers (PO16, EN16, PBF4) and handling OSC communication. These controllers are composed of MIDI elements (potentiometers, encoders, faders and buttons).
 
 ### Properties
+
 - `fullName`: The full name of the controller.
 - `shortName`: The short name of the controller.
 - `midiChannel`: The MIDI channel used for communication.
 - `oscServAddr`: The OSC server address.
 - `oscServPort`: The OSC server port.
-- `potCount`: The number of potentiometers.
-- `encCount`: The number of encoders.
-- `fadCount`: The number of faders.
-- `butCount`: The number of buttons.
-- `controlBusDict`: A dictionary that maps control bus keys to their corresponding control buses.
-- `deviceNumb`: The device number.
+- `potCount`: The number of potentiometers of the controller.
+- `encCount`: The number of encoders of the controller.
+- `fadCount`: The number of faders of the controller.
+- `butCount`: The number of buttons of the controller.
+- `controlBusDict`: A dictionary that maps for each MIDI element, their control bus keys to their corresponding control buses.
+- `deviceNumb`: The device number (when connecting more than 1 device of the same type).
 
 ### Methods
+
 - `*new(fullName, shortName, midiChannel, oscServAddr, oscServPort)`: Constructor method for creating a new `JMIntechControllers` instance.
 - `init(fullName, shortName, midiChannel, oscServAddr, oscServPort)`: Initialization method for setting the properties of the instance.
-- `buildElementsDict()`: Method for building the `controlBusDict` dictionary based on the number of elements (potentiometers, encoders, faders, buttons).
-- `controlBus(key)`: Method for retrieving the control bus associated with a given key.
+- `buildElementsDict()`: Method for building the `controlBusDict` dictionary based on the number of MIDI elements (potentiometers, encoders, faders, buttons).
+- `controlBus(key)`: Method for retrieving the control bus associated with a given key (a given element).
 - `size()`: Method for getting the size of the `controlBusDict` dictionary.
 - `free()`: Method for freeing the control buses and decrementing the device number.
 
 ### Usage
-To use the `JMIntechControllers` class, create an instance by calling the constructor method `*new` and pass the required parameters. Then, call the `buildElementsDict` method to build the control bus dictionary. You can access the control buses using the `controlBus` method and perform operations on them. Finally, when you're done using the instance, call the `free` method to free the control buses and decrement the device number.
 
-## JOElementButton
+The `JMIntechControllers` class is not used directly. It is used as an abstract superclass for the `JMIntechPO16`, `JMIntechEN16` and `JMIntechPBF4` classes.
 
-The `JOElementButton` class represents a MIDI button element. It inherits from the `JOMIDIElements` class.
+## JMElementButton
+
+The `JMElementButton` class represents a MIDI button element. It inherits from the `JMMIDIElements` class.
 
 ### Properties
 
@@ -58,14 +65,14 @@ The `JOElementButton` class represents a MIDI button element. It inherits from t
 
 ### Methods
 
-- `new(name, deviceNumb, elementNumber, midiChannel, cc)`: Creates a new `JOElementButton` instance.
+- `new(name, deviceNumb, elementNumber, midiChannel, cc)`: Creates a new `JMElementButton` instance.
 - `initButton(cc)`: Initializes the button with the specified MIDI control change number.
 - `midiReceiver`: Handles MIDI control change events for the button.
 - `mappedMIDIValuetoControlBus`: Maps the MIDI value to the control bus and updates the control bus value.
 
-## JOOSCManager
+## JMOSCManager
 
-The `JOOSCManager` class provides OSC functionalities for sending OSC messages to an OSC server.
+The `JMOSCManager` class provides OSC functionalities for sending OSC messages to an OSC server.
 
 ### Properties
 
@@ -75,19 +82,22 @@ The `JOOSCManager` class provides OSC functionalities for sending OSC messages t
 
 ### Methods
 
-- `new(oscServAddr, oscServPort)`: Creates a new `JOOSCManager` instance.
-- `getSharedInstance(oscServAddr, oscServPort)`: Gets or creates the shared instance of `JOOSCManager`.
+- `new(oscServAddr, oscServPort)`: Creates a new `JMOSCManager` instance.
+- `getSharedInstance(oscServAddr, oscServPort)`: Gets or creates the shared instance of `JMOSCManager`.
 - `send(oscPath, args)`: Sends an OSC message with the specified OSC path and arguments.
 
 ## Usage
 
 To use the JMMIDIOSC extension, follow these steps:
 
-1. Create an instance of `JOOSCManager` by calling `JOOSCManager.getSharedInstance(oscServAddr, oscServPort)`.
-2. Create an instance of `JOElementButton` by calling `JOElementButton.new(name, deviceNumb, elementNumber, midiChannel, cc)`.
-3. Initialize the button by calling `initButton(cc)`.
-4. Handle MIDI control change events by implementing the `midiReceiver` method.
-5. Map the MIDI value to the control bus and update the control bus value by calling `mappedMIDIValuetoControlBus`.
-6. Send OSC messages using the `send` method of `JOOSCManager`.
+Use to send OSC messages in patch files:
+
+1. Create an instance of `JMOSCManager` by calling `JMOSCManager(oscServAddr, oscServPort)`.
+2. Send OSC messages using the `send` method of `JMOSCManager`.
+
+Use with Intech Studio MIDI controllers:
+
+1. Create an instance of `JMIntechPO16` (or any other Intech Studio MIDI controllers), by calling `JMIntechPO16.new(fullName, shortName, midiChannel, oscServAddr, oscServPort)` (i.e. `~po16 = JOIntechPO16(midiChannel: 0, startCC: 0, oscServAddr: "127.0.0.1", oscServPort: 9000);`).
+2. Interpret `JMIntechPO16.sendBusOSC("/some/osc/path/"), \elementindex)` (i.e. `~pbf41.sendBusOSC("/pbf4_1/fa1", \FA1);`).
 
 For more information, refer to the SuperCollider documentation.

@@ -2,6 +2,19 @@
 
 JMMIDIOSC is a SuperCollider extension that provides a set of classes for Intech Studio MIDI controllers (PO16, EN16, PBF4) to control MIDI elements such as potentiometers, encoders, faders and buttons with MIDI and OSC functionalities.
 
+## Class tree
+
+├── JMIntechControllers.sc # Abstract superclass for Intech Studio MIDI controllers 
+│ ├── JMIntechPO16.sc # PO16 controller class 
+│ ├── JMIntechEN16.sc # EN16 controller class
+│ └── JMIntechPBF4.sc # PBF4 controller class 
+├── JMMIDIElements.sc # Abstract superclass for MIDI elements
+│ ├── JMElementPotentiometer.sc # Potentiometer class
+│ ├── JMElementEncoder.sc # Encoder class
+│ ├── JMElementFader.sc # Fader class
+│ └── JMElementButton.sc # Button class
+└── JMOSCManager.sc # OSC manager class
+
 ## JMIntechControllers
 
 ### Overview

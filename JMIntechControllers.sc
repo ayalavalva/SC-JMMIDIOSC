@@ -2,6 +2,7 @@ JMIntechControllers {
     var <>fullName, <>shortName, <>midiChannel, <>oscServAddr, <>oscServPort;
     var <>potCount = 0, <>encCount = 0, <>fadCount = 0, <>butCount = 0;
     var <>controlBusDict;
+    var <>elementDict;
     var <>deviceNumb;
 
     *new { |fullName, shortName, midiChannel, oscServAddr, oscServPort|
@@ -14,20 +15,24 @@ JMIntechControllers {
         this.deviceNumb = deviceNumb;
         this.midiChannel = midiChannel;
         this.oscServAddr = oscServAddr;
-        this.oscServPort = oscServPort
+        this.oscServPort = oscServPort;
+
+        this.controlBusDict = IdentityDictionary.new(n: potCount + encCount + fadCount + butCount);
+        this.elementDict = IdentityDictionary.new(n: potCount + encCount + fadCount + butCount);
     }
     
     buildElementsDict {
         
-        this.controlBusDict = IdentityDictionary.new(n: potCount + encCount + fadCount + butCount);
+        
 
         potCount.do { |i|
             var elementNumber = i + 1;
             var msbCC = this.startCC + i;
             var lsbCC = msbCC + this.potCount + this.fadCount + this.butCount;
             var elementKey = "PO%".format(elementNumber).asSymbol;
-            var element = JMElementPotentiometer.new(this.fullName, this.deviceNumb, elementNumber, this.midiChannel, msbCC, lsbCC);
+            var element = JMElementPotentiometer.new(this.fullName, this.shortName, this.deviceNumb, elementNumber, this.midiChannel, msbCC, lsbCC);
             this.controlBusDict.put(elementKey, element.controlBus);
+            this.elementDict.put(elementKey, element);
             (this.fullName ++ (if (this.shortName == "PBF4") {" (%)".format(this.deviceNumb)} {""}) + "Potentiometer" + elementNumber + "MIDI Channel" + this.midiChannel + "msbCC" + msbCC + "lsbCC" + lsbCC).postln;
         };
 
@@ -35,7 +40,7 @@ JMIntechControllers {
             var elementNumber = i + 1;
             var cc = potCount + this.startCC + i;
             var elementKey = "EN%".format(elementNumber).asSymbol;
-            var element = JMElementEncoder.new(this.fullName, this.deviceNumb, elementNumber, this.midiChannel, cc);
+            var element = JMElementEncoder.new(this.fullName, this.shortName, this.deviceNumb, elementNumber, this.midiChannel, cc);
             this.controlBusDict.put(elementKey, element.controlBus);
             (this.fullName ++ (if (this.shortName == "PBF4") {" (%)".format(this.deviceNumb)} {""}) + "Encoder" + elementNumber + "MIDI Channel" + this.midiChannel + "CC" + cc).postln;
         };
@@ -45,8 +50,9 @@ JMIntechControllers {
             var msbCC = potCount + this.startCC + i;
             var lsbCC = msbCC + this.fadCount + this.potCount + this.butCount;
             var elementKey = "FA%".format(elementNumber).asSymbol;
-            var element = JMElementFader.new(this.fullName, this.deviceNumb, elementNumber, this.midiChannel, msbCC, lsbCC);
+            var element = JMElementFader.new(this.fullName, this.shortName, this.deviceNumb, elementNumber, this.midiChannel, msbCC, lsbCC);
             this.controlBusDict.put(elementKey, element.controlBus);
+            this.elementDict.put(elementKey, element);
             (this.fullName ++ (if (this.shortName == "PBF4") {" (%)".format(this.deviceNumb)} {""}) + "Fader" + elementNumber + "MIDI Channel" + this.midiChannel + "msbCC" + msbCC + "lsbCC" + lsbCC).postln;
         };
 
@@ -54,7 +60,7 @@ JMIntechControllers {
             var elementNumber = i + 1;
             var cc = potCount + fadCount + encCount + this.startCC + i;
             var elementKey = "BU%".format(elementNumber).asSymbol;
-            var element = JMElementButton.new(this.fullName, this.deviceNumb, elementNumber, this.midiChannel, cc);
+            var element = JMElementButton.new(this.fullName, this.shortName, this.deviceNumb, elementNumber, this.midiChannel, cc);
             this.controlBusDict.put(elementKey, element.controlBus);
             (this.fullName ++ (if (this.shortName == "PBF4") {" (%)".format(this.deviceNumb)} {""}) + "Button" + elementNumber + "MIDI Channel" + this.midiChannel + "CC" + cc).postln;
         };
@@ -72,8 +78,11 @@ JMIntechControllers {
         ^Lag.kr(this.inCB(key), lag); 
     }
 
-    sendBusOSC { |oscPath, key|
-        JMOSCManager.getSharedInstance.send(oscPath, this.controlBusDict.at(key));
+    midiOSC { |elementKeys, enableFlag = true|
+        elementKeys.do { |key|
+            var element = this.elementDict.at(key);
+            element.oscSendEnabled = enableFlag;
+        };
     }
 
     dictSize {

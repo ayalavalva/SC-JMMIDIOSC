@@ -2,9 +2,10 @@ JMElementButton : JMMIDIElements {
     var <>cc;
     var <>ccValue;
     var <>controlBus;
+    var <>oscSendEnabled = false;
 
-    *new { |name, deviceNumb, elementNumber, midiChannel, cc|
-        ^super.new.init(name, deviceNumb, elementNumber, midiChannel).initButton(cc)
+    *new { |deviceFullName, deviceShortName, deviceNumb, elementNumber, midiChannel, cc|
+        ^super.new.init(deviceFullName, deviceShortName, deviceNumb, elementNumber, midiChannel).initButton(cc)
     }
 
     initButton { |cc|
@@ -15,15 +16,20 @@ JMElementButton : JMMIDIElements {
     }
 
     midiReceiver {
-        MIDIdef.cc("%_But%".format(this.name, this.elementNumber), { |val|
+        MIDIdef.cc("%_But%".format(this.deviceFullName, this.elementNumber), { |val|
             this.ccValue = val;
-            this.mappedMIDIValuetoControlBus;
+            this.midiValuetoControlBus;
         }, ccNum: this.cc, chan: this.midiChannel);
     }
 
-    mappedMIDIValuetoControlBus {
-        var mappedValue = this.ccValue.linlin(0, 127, 0, 1);
-        this.controlBus.set(mappedValue);
-        (this.name ++ (if (this.name == "Intech Studio PBF4") {" (" ++ this.deviceNumb ++ ")"} {""}) + "Button" + this.elementNumber + "MIDI Channel" + this.midiChannel + "CC" + this.cc ++ ":" + mappedValue).postln;
+    midiValuetoControlBus {
+        var midiValue = this.ccValue.linlin(0, 127, 0, 1);
+        this.controlBus.set(midiValue);
+        (this.deviceFullName ++ (if (this.deviceShortName == "PBF4") {" (" ++ this.deviceNumb ++ ")"} {""}) + "Button" + this.elementNumber + "MIDI Channel" + this.midiChannel + "CC" + this.cc ++ ":" + midiValue).postln;
+
+        if (this.oscSendEnabled) {
+            var oscPath = "/%/bu".format(this.deviceShortName.toLower) ++ this.elementNumber.asString; // Construct the OSC path based on the element number
+            JMOSCManager.getSharedInstance.send(oscPath, this.midiToOSCValue); // Send the value via OSC
+        }
     }
 }

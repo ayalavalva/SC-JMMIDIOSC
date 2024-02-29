@@ -1,12 +1,13 @@
 JMMIDIElements {
-    var <>name, <>deviceNumb, <>elementNumber, <>midiChannel;
+    var <>deviceFullName, <>deviceShortName, <>deviceNumb, <>elementNumber, <>midiChannel;
 
-    *new { |name, deviceNumb, elementNumber, midiChannel|
-        ^super.new(name, deviceNumb, elementNumber, midiChannel)
+    *new { |deviceFullName, deviceShortName, deviceNumb, elementNumber, midiChannel|
+        ^super.new(deviceFullName, deviceShortName, deviceNumb, elementNumber, midiChannel)
     }
 
-    init { |name, deviceNumb, elementNumber, midiChannel|
-        this.name = name;
+    init { |deviceFullName, deviceShortName, deviceNumb, elementNumber, midiChannel|
+        this.deviceFullName = deviceFullName;
+        this.deviceShortName = deviceShortName;
         this.deviceNumb = deviceNumb;
         this.elementNumber = elementNumber;
         this.midiChannel = midiChannel;

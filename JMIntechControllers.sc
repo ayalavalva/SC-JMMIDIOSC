@@ -42,6 +42,7 @@ JMIntechControllers {
             var elementKey = "EN%".format(elementNumber).asSymbol;
             var element = JMElementEncoder.new(this.deviceFullName, this.deviceShortName, this.deviceNumb, elementNumber, this.midiChannel, cc);
             this.controlBusDict.put(elementKey, element.controlBus);
+            this.elementDict.put(elementKey, element);
             (this.deviceFullName ++ (if (this.deviceShortName == "PBF4") {" (%)".format(this.deviceNumb)} {""}) + "Encoder" + elementNumber + "MIDI Channel" + this.midiChannel + "CC" + cc).postln;
         };
 
@@ -62,6 +63,7 @@ JMIntechControllers {
             var elementKey = "BU%".format(elementNumber).asSymbol;
             var element = JMElementButton.new(this.deviceFullName, this.deviceShortName, this.deviceNumb, elementNumber, this.midiChannel, cc);
             this.controlBusDict.put(elementKey, element.controlBus);
+            this.elementDict.put(elementKey, element);
             (this.deviceFullName ++ (if (this.deviceShortName == "PBF4") {" (%)".format(this.deviceNumb)} {""}) + "Button" + elementNumber + "MIDI Channel" + this.midiChannel + "CC" + cc).postln;
         };
     }

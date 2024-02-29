@@ -12,7 +12,6 @@ JMElementButton : JMMIDIElements {
     initButton { |cc|
         this.cc = cc;
         this.controlBus = Bus.control(Server.default, 1); // Control bus is now directly accessible
-
         super.midi7bitReceiver;
     }
 }

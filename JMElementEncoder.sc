@@ -5,8 +5,8 @@ JMElementEncoder : JMMIDIElements {
     var <>controlBus;
     var <>oscSendEnabled = false;
 
-    *new { |deviceFullName, deviceShortName, deviceNumb, elementNumber, midiChannel, controller, cc|
-        ^super.new.init(deviceFullName, deviceShortName, deviceNumb, "Encoder", "EN", elementNumber, midiChannel, controller).initEncoder(cc)
+    *new { |controller, deviceFullName, deviceShortName, deviceNumb, elementNumber, midiChannel, cc|
+        ^super.new.init(controller, deviceFullName, deviceShortName, deviceNumb, "Encoder", "EN", elementNumber, midiChannel).initEncoder(cc)
     }
 
     initEncoder { |cc|

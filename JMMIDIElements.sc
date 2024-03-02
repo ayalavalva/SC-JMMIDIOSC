@@ -1,11 +1,12 @@
 JMMIDIElements {
-    var <>deviceFullName, <>deviceShortName, <>deviceNumb, <>elementFullName, <>elementShortName, <>elementNumber, <>midiChannel, <>controller;
+    var <>controller, <>deviceFullName, <>deviceShortName, <>deviceNumb, <>elementFullName, <>elementShortName, <>elementNumber, <>midiChannel;
 
-    *new { |deviceFullName, deviceShortName, deviceNumb, elementFullName, elementShortName, elementNumber, midiChannel, controller|
-        ^super.new(deviceFullName, deviceShortName, deviceNumb, elementFullName, elementShortName, elementNumber, midiChannel, controller)
+    *new { |controller, deviceFullName, deviceShortName, deviceNumb, elementFullName, elementShortName, elementNumber, midiChannel|
+        ^super.new(controller, deviceFullName, deviceShortName, deviceNumb, elementFullName, elementShortName, elementNumber, midiChannel)
     }
 
-    init { |deviceFullName, deviceShortName, deviceNumb, elementFullName, elementShortName, elementNumber, midiChannel, controller|
+    init { |controller, deviceFullName, deviceShortName, deviceNumb, elementFullName, elementShortName, elementNumber, midiChannel|
+        this.controller = controller;
         this.deviceFullName = deviceFullName;
         this.deviceShortName = deviceShortName;
         this.deviceNumb = deviceNumb;
@@ -13,7 +14,6 @@ JMMIDIElements {
         this.elementShortName = elementShortName;
         this.elementNumber = elementNumber;
         this.midiChannel = midiChannel;
-        this.controller = controller;
     }
 
     midi7bitReceiver {
@@ -56,6 +56,8 @@ JMMIDIElements {
             this.controlBus.set(midiValue);
             (this.deviceFullName ++ (if (this.deviceShortName == "PBF4") {" (" ++ this.deviceNumb ++ ")"} {""}) + this.elementFullName + this.elementNumber + "MIDI Channel" + this.midiChannel + "msbCC" + this.msbCC + "lsbCC" + this.lsbCC ++ ":" + midiValue).postln;
             this.midiToOSCValue = midiValue; // Update the midiToOSCValue with the new MIDI value
+
+            this.controller.triggerCallback((this.elementShortName ++ this.elementNumber).asSymbol, midiValue);
 
             this.msbUpdated = false; // Reset the updated flags
             this.lsbUpdated = false;

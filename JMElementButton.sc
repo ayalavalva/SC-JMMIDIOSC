@@ -5,8 +5,8 @@ JMElementButton : JMMIDIElements {
     var <>controlBus;
     var <>oscSendEnabled = false;
 
-    *new { |deviceFullName, deviceShortName, deviceNumb, elementNumber, midiChannel, controller, cc|
-        ^super.new.init(deviceFullName, deviceShortName, deviceNumb, "Button", "BU", elementNumber, midiChannel, controller).initButton(cc)
+    *new { |controller, deviceFullName, deviceShortName, deviceNumb, elementNumber, midiChannel, cc|
+        ^super.new.init(controller, deviceFullName, deviceShortName, deviceNumb, "Button", "BU", elementNumber, midiChannel).initButton(cc)
     }
 
     initButton { |cc|

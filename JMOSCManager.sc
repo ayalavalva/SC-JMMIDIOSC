@@ -23,7 +23,7 @@ JMOSCManager {
     }
 
     send { |oscPath, args|
-    "Sending OSC Message: %, Args: %".format(oscPath, args).postln;
+    "Sending OSC Message to Address: % Value: %".format(oscPath, args).postln;
         this.oscAddr.sendMsg(oscPath, *args);
     }
 }

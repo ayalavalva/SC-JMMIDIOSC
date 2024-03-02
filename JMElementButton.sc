@@ -5,8 +5,8 @@ JMElementButton : JMMIDIElements {
     var <>controlBus;
     var <>oscSendEnabled = false;
 
-    *new { |deviceFullName, deviceShortName, deviceNumb, elementNumber, midiChannel, cc|
-        ^super.new.init(deviceFullName, deviceShortName, deviceNumb, "Button", "BU", elementNumber, midiChannel).initButton(cc)
+    *new { |deviceFullName, deviceShortName, deviceNumb, elementNumber, midiChannel, controller, cc|
+        ^super.new.init(deviceFullName, deviceShortName, deviceNumb, "Button", "BU", elementNumber, midiChannel, controller).initButton(cc)
     }
 
     initButton { |cc|
@@ -14,4 +14,8 @@ JMElementButton : JMMIDIElements {
         this.controlBus = Bus.control(Server.default, 1); // Control bus is now directly accessible
         super.midi7bitReceiver;
     }
+
+    getMIDIValue {
+        ^this.midiToOSCValue;
+    } 
 }

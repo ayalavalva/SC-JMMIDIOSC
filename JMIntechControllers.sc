@@ -3,6 +3,7 @@ JMIntechControllers {
     var <>potCount = 0, <>encCount = 0, <>fadCount = 0, <>butCount = 0;
     var <>controlBusDict;
     var <>elementDict;
+    var <>callbackDict;
     var <>deviceNumb;
 
     *new { |deviceFullName, deviceShortName, midiChannel, oscServAddr, oscServPort|
@@ -19,6 +20,7 @@ JMIntechControllers {
 
         this.controlBusDict = IdentityDictionary.new(n: potCount + encCount + fadCount + butCount);
         this.elementDict = IdentityDictionary.new(n: potCount + encCount + fadCount + butCount);
+        this.callbackDict = IdentityDictionary.new;
     }
     
     buildElementsDict {
@@ -30,7 +32,7 @@ JMIntechControllers {
             var msbCC = this.startCC + i;
             var lsbCC = msbCC + this.potCount + this.fadCount + this.butCount;
             var elementKey = "PO%".format(elementNumber).asSymbol;
-            var element = JMElementPotentiometer.new(this.deviceFullName, this.deviceShortName, this.deviceNumb, elementNumber, this.midiChannel, msbCC, lsbCC);
+            var element = JMElementPotentiometer.new(this.deviceFullName, this.deviceShortName, this.deviceNumb, elementNumber, this.midiChannel, this, msbCC, lsbCC);
             this.controlBusDict.put(elementKey, element.controlBus);
             this.elementDict.put(elementKey, element);
             (this.deviceFullName ++ (if (this.deviceShortName == "PBF4") {" (%)".format(this.deviceNumb)} {""}) + "Potentiometer" + elementNumber + "MIDI Channel" + this.midiChannel + "msbCC" + msbCC + "lsbCC" + lsbCC).postln;
@@ -40,7 +42,7 @@ JMIntechControllers {
             var elementNumber = i + 1;
             var cc = potCount + this.startCC + i;
             var elementKey = "EN%".format(elementNumber).asSymbol;
-            var element = JMElementEncoder.new(this.deviceFullName, this.deviceShortName, this.deviceNumb, elementNumber, this.midiChannel, cc);
+            var element = JMElementEncoder.new(this.deviceFullName, this.deviceShortName, this.deviceNumb, elementNumber, this.midiChannel, this, cc);
             this.controlBusDict.put(elementKey, element.controlBus);
             this.elementDict.put(elementKey, element);
             (this.deviceFullName ++ (if (this.deviceShortName == "PBF4") {" (%)".format(this.deviceNumb)} {""}) + "Encoder" + elementNumber + "MIDI Channel" + this.midiChannel + "CC" + cc).postln;
@@ -51,7 +53,7 @@ JMIntechControllers {
             var msbCC = potCount + this.startCC + i;
             var lsbCC = msbCC + this.fadCount + this.potCount + this.butCount;
             var elementKey = "FA%".format(elementNumber).asSymbol;
-            var element = JMElementFader.new(this.deviceFullName, this.deviceShortName, this.deviceNumb, elementNumber, this.midiChannel, msbCC, lsbCC);
+            var element = JMElementFader.new(this.deviceFullName, this.deviceShortName, this.deviceNumb, elementNumber, this.midiChannel, this, msbCC, lsbCC);
             this.controlBusDict.put(elementKey, element.controlBus);
             this.elementDict.put(elementKey, element);
             (this.deviceFullName ++ (if (this.deviceShortName == "PBF4") {" (%)".format(this.deviceNumb)} {""}) + "Fader" + elementNumber + "MIDI Channel" + this.midiChannel + "msbCC" + msbCC + "lsbCC" + lsbCC).postln;
@@ -61,12 +63,25 @@ JMIntechControllers {
             var elementNumber = i + 1;
             var cc = potCount + fadCount + encCount + this.startCC + i;
             var elementKey = "BU%".format(elementNumber).asSymbol;
-            var element = JMElementButton.new(this.deviceFullName, this.deviceShortName, this.deviceNumb, elementNumber, this.midiChannel, cc);
+            var element = JMElementButton.new(this.deviceFullName, this.deviceShortName, this.deviceNumb, elementNumber, this.midiChannel, this, cc);
             this.controlBusDict.put(elementKey, element.controlBus);
             this.elementDict.put(elementKey, element);
             (this.deviceFullName ++ (if (this.deviceShortName == "PBF4") {" (%)".format(this.deviceNumb)} {""}) + "Button" + elementNumber + "MIDI Channel" + this.midiChannel + "CC" + cc).postln;
         };
     }
+
+    // Method to register a callback for a specific element
+    registerCallback { |elementKey, callbackFunc|
+        this.callbackDict.put(elementKey, callbackFunc);
+    }
+
+     // Method to trigger a callback for a specific element
+     triggerCallback { |elementKey, value|
+        var callback = this.callbackDict.at(elementKey);
+        if (callback.notNil) {
+            callback.value(value);
+        }
+    }   
 
     cb { |key|
         ^this.controlBusDict.at(key);

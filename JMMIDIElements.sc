@@ -1,11 +1,11 @@
 JMMIDIElements {
-    var <>deviceFullName, <>deviceShortName, <>deviceNumb, <>elementFullName, <>elementShortName, <>elementNumber, <>midiChannel;
+    var <>deviceFullName, <>deviceShortName, <>deviceNumb, <>elementFullName, <>elementShortName, <>elementNumber, <>midiChannel, <>controller;
 
-    *new { |deviceFullName, deviceShortName, deviceNumb, elementFullName, elementShortName, elementNumber, midiChannel|
-        ^super.new(deviceFullName, deviceShortName, deviceNumb, elementFullName, elementShortName, elementNumber, midiChannel)
+    *new { |deviceFullName, deviceShortName, deviceNumb, elementFullName, elementShortName, elementNumber, midiChannel, controller|
+        ^super.new(deviceFullName, deviceShortName, deviceNumb, elementFullName, elementShortName, elementNumber, midiChannel, controller)
     }
 
-    init { |deviceFullName, deviceShortName, deviceNumb, elementFullName, elementShortName, elementNumber, midiChannel|
+    init { |deviceFullName, deviceShortName, deviceNumb, elementFullName, elementShortName, elementNumber, midiChannel, controller|
         this.deviceFullName = deviceFullName;
         this.deviceShortName = deviceShortName;
         this.deviceNumb = deviceNumb;
@@ -13,6 +13,7 @@ JMMIDIElements {
         this.elementShortName = elementShortName;
         this.elementNumber = elementNumber;
         this.midiChannel = midiChannel;
+        this.controller = controller;
     }
 
     midi7bitReceiver {
@@ -26,8 +27,11 @@ JMMIDIElements {
         var midiValue;
         switch(this.elementShortName) { "EN" } {midiValue = (this.ccValue - 64).sign * ((this.ccValue - 64).abs.pow(3)).asInteger} { "BU" } {midiValue = this.ccValue.linlin(0, 127, 0, 1)};
         this.controlBus.set(midiValue);
-        (this.deviceFullName ++ (if (this.deviceShortName == "PBF4") {" (" ++ this.deviceNumb ++ ")"} {""}) + "Encoder" + this.elementNumber + "MIDI Channel" + this.midiChannel + "CC" + this.cc ++ ":" + midiValue).postln;
+        (this.deviceFullName ++ (if (this.deviceShortName == "PBF4") {" (" ++ this.deviceNumb ++ ")"} {""}) + (switch(this.elementShortName) {"EN"} {"Encoder"} {"BU"} {"Button"}) + this.elementNumber + "MIDI Channel" + this.midiChannel + "CC" + this.cc ++ ":" + midiValue).postln;
         this.midiToOSCValue = midiValue; // Update the midiToOSCValue with the new MIDI value
+
+        // Assuming 'controller' is a reference to the JMIntechControllers instance managing this element
+        this.controller.triggerCallback((this.elementShortName ++ this.elementNumber).asSymbol, midiValue);
 
         this.sendMIDIValuetoOSC;
     }

@@ -6,8 +6,8 @@ JMElementFader : JMMIDIElements {
     var <>controlBus;
     var <>oscSendEnabled = false;
 
-    *new { |deviceFullName, deviceShortName, deviceNumb, elementNumber, midiChannel, msbCC, lsbCC|
-        ^super.new.init(deviceFullName, deviceShortName, deviceNumb, "Fader", "FA", elementNumber, midiChannel).initFader(msbCC, lsbCC)
+    *new { |deviceFullName, deviceShortName, deviceNumb, elementNumber, midiChannel, controller, msbCC, lsbCC|
+        ^super.new.init(deviceFullName, deviceShortName, deviceNumb, "Fader", "FA", elementNumber, midiChannel, controller).initFader(msbCC, lsbCC)
     }
 
     initFader { |msbCC, lsbCC|

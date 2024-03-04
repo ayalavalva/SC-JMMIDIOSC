@@ -34,6 +34,7 @@ JMMIDIElements {
         this.controller.triggerCallback((this.elementShortName ++ this.elementNumber).asSymbol, midiValue);
 
         this.sendMIDIValuetoOSC;
+        this.receiveOSCValuetoControlBus;
     }
 
     midi14bitReceivers {
@@ -63,6 +64,7 @@ JMMIDIElements {
             this.lsbUpdated = false;
 
             this.sendMIDIValuetoOSC;
+            this.receiveOSCValuetoControlBus;
         }
     }
 
@@ -71,5 +73,15 @@ JMMIDIElements {
             var oscPath = "/%/%".format(if(this.deviceShortName == "PBF4") {this.deviceShortName.toLower ++ "_" ++ this.deviceNumb} {this.deviceShortName.toLower}, this.elementShortName.toLower) ++ this.elementNumber.asString; // Construct the OSC path
             JMOSCManager.getSharedInstance.send(oscPath, this.midiToOSCValue); // Send the value via OSC
         }
+    }
+
+    // Doesn't work for encoders and buttons unless action on the physical device first ... and even with that, no triggerCallBack for Pbindefs;
+    receiveOSCValuetoControlBus {
+        OSCdef(("%%".format(if(this.deviceShortName == "PBF4") {this.deviceShortName.toLower ++ "_" ++ this.deviceNumb} {this.deviceShortName.toLower}, this.elementShortName.toLower) ++ this.elementNumber).asSymbol, { |msg|
+            var oscValue = msg[1];
+            this.controlBus.set(oscValue);
+            this.controller.triggerCallback((this.elementShortName ++ this.elementNumber).asSymbol, oscValue);
+            (this.deviceFullName ++ (if (this.deviceShortName == "PBF4") {" (" ++ this.deviceNumb ++ ")"} {""}) + this.elementFullName + this.elementNumber + "OSC:" + oscValue).postln;
+        }, "/%/%".format(if(this.deviceShortName == "PBF4") {this.deviceShortName.toLower ++ "_" ++ this.deviceNumb} {this.deviceShortName.toLower}, this.elementShortName.toLower) ++ this.elementNumber.asString;);
     }
 }

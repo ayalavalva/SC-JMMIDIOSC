@@ -30,8 +30,7 @@ JMMIDIElements {
         (this.deviceFullName ++ (if (this.deviceShortName == "PBF4") {" (" ++ this.deviceNumb ++ ")"} {""}) + (switch(this.elementShortName) {"EN"} {"Encoder"} {"BU"} {"Button"}) + this.elementNumber + "MIDI Channel" + this.midiChannel + "CC" + this.cc ++ ":" + midiValue).postln;
         this.midiToOSCValue = midiValue; // Update the midiToOSCValue with the new MIDI value
 
-        // Assuming 'controller' is a reference to the JMIntechControllers instance managing this element
-        this.controller.triggerCallback((this.elementShortName ++ this.elementNumber).asSymbol, midiValue);
+        this.controller.triggerCallback((this.elementShortName ++ this.elementNumber).asSymbol, midiValue); // controller is a reference to the PO16 / EN16 / PBF4 controller object
 
         this.sendMIDIValuetoOSC;
     }

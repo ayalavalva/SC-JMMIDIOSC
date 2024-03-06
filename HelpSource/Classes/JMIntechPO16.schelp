@@ -1,0 +1,51 @@
+TITLE:: JMIntechPO16
+summary:: A specialized subclass of JMIntechControllers for managing the Intech Studio PO16 MIDI controller.
+categories:: Libraries>MIDI
+related:: Classes/JMIntechControllers
+
+DESCRIPTION::
+The JMIntechPO16 class is tailored to manage the Intech Studio PO16 MIDI controller, which is equipped with 16 potentiometers. It extends the JMIntechControllers class, adding functionalities specific to the initialization and management of the PO16 device, including setting up MIDI channels, control change (CC) numbers, and OSC communication parameters for potentiometers.
+
+CLASSMETHODS::
+
+METHOD:: classDeviceNumb
+A class variable that tracks the number of JMIntechPO16 instances created, ensuring each has a unique device number.
+returns:: The current count of JMIntechPO16 instances.
+
+METHOD:: new
+Creates a new instance of JMIntechPO16, automatically assigning it a unique device number and setting up its MIDI and OSC configuration.
+ARGUMENT:: midiChannel
+The MIDI channel to be used by the PO16 device (default is 0).
+ARGUMENT:: startCC
+The starting MIDI CC number for the first potentiometer (default is 0).
+ARGUMENT:: oscServAddr
+The OSC server's network address for sending OSC messages (default is "127.0.0.1").
+ARGUMENT:: oscServPort
+The network port number used by the OSC server (default is 9000).
+returns:: A new instance of JMIntechPO16 configured with the specified MIDI channel, start CC, OSC server address, and port.
+
+INSTANCEMETHODS::
+
+METHOD:: startCC
+Provides access to the starting MIDI CC number used by the first potentiometer on the PO16 device.
+returns:: The starting MIDI CC number.
+
+METHOD:: deviceNumb
+Provides access to the unique device number assigned to the instance of JMIntechPO16.
+returns:: The unique device number for the instance.
+
+METHOD:: initPO16
+Initializes the PO16 device, setting up the MIDI configuration for its 16 potentiometers.
+ARGUMENT:: startCC
+The starting MIDI CC number for the first potentiometer.
+returns:: nil, after initializing the potentiometers and configuring their MIDI CC numbers.
+
+EXAMPLES::
+
+code::
+// Initialize a new JMIntechPO16 device with default settings
+~po16 = JMIntechPO16(midiChannel: 0, startCC: 0, oscServAddr: "127.0.0.1", oscServPort: 9000);
+
+// Adjust the startCC if needed
+~po16.initPO16(10); // Start MIDI CCs for potentiometers at 10
+::

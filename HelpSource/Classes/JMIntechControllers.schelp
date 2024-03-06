@@ -1,0 +1,136 @@
+TITLE:: JMIntechControllers
+summary:: A superclass for managing various types of MIDI controller devices, providing initialization and communication capabilities.
+categories:: Libraries>MIDI
+related:: Classes/JMIntechPO16, Classes/JMIntechEN16, Classes/JMIntechPBF4
+
+DESCRIPTION::
+JMIntechControllers is an abstract superclass designed to manage MIDI controller devices, handling initialization, MIDI control element mapping, and OSC communication. It supports a range of control elements such as potentiometers, encoders, faders, and buttons, and facilitates the organization of these elements within control bus dictionaries, element dictionaries, and MIDI value dictionaries for efficient processing and callback management.
+
+CLASSMETHODS::
+
+METHOD:: new
+Creates a new instance of JMIntechControllers with the specified device details and OSC server configuration.
+ARGUMENT:: deviceFullName
+The full name of the MIDI device, used for identification and logging (i.e. Intech Studio PO16).
+ARGUMENT:: deviceShortName
+A short, unique identifier for the MIDI device, facilitating easier reference (i.e. PO16, EN16, PBF4).
+ARGUMENT:: midiChannel
+The MIDI channel that the device will use for communication.
+ARGUMENT:: oscServAddr
+The network address of the OSC server for sending OSC messages.
+ARGUMENT:: oscServPort
+The network port of the OSC server for OSC communication.
+returns:: A new instance of JMIntechControllers configured with the specified parameters.
+
+INSTANCEMETHODS::
+
+METHOD:: cb
+Retrieves the control bus associated with a specific element key.
+ARGUMENT:: key
+The key representing a MIDI control element in the controlBusDict.
+returns:: The control bus associated with the given key, allowing for direct manipulation of control values within SynthDefs.
+
+METHOD:: deviceShortName
+Provides access to the device's short name property.
+returns:: The short name of the MIDI device.
+
+METHOD:: midiValueDict
+Provides access to the dictionary mapping element keys to their MIDI values or callbacks.
+returns:: The IdentityDictionary storing MIDI values or callbacks associated with element keys.
+
+METHOD:: lagInCB
+Applies a lag to the control bus signal associated with a specific element key, smoothing out rapid changes in control values.
+ARGUMENT:: key
+The key representing a MIDI control element in the controlBusDict.
+ARGUMENT:: lag
+The time, in seconds, over which the control value changes are smoothed.
+returns:: A Lag.kr UGen applying the specified lag to the control bus signal.
+
+METHOD:: free
+Frees resources associated with the MIDI controller, including freeing control buses.
+returns:: nil
+
+METHOD:: oscServAddr
+Provides access to the OSC server address property.
+returns:: The network address of the OSC server.
+
+METHOD:: deviceNumb
+Provides access to the unique device number assigned to this instance.
+returns:: The unique device number.
+
+METHOD:: controlBusDict
+Provides access to the dictionary storing control buses for MIDI elements.
+returns:: The IdentityDictionary storing control buses.
+
+METHOD:: init
+Initializes the MIDI controller with the specified parameters, setting up dictionaries and device properties.
+ARGUMENT:: deviceFullName
+The full name of the MIDI device, used for identification and logging (i.e. Intech Studio PO16).
+ARGUMENT:: deviceShortName
+A short, unique identifier for the MIDI device, facilitating easier reference (i.e. PO16, EN16, PBF4).
+ARGUMENT:: midiChannel
+The MIDI channel that the device will use for communication.
+ARGUMENT:: oscServAddr
+The network address of the OSC server for sending OSC messages.
+ARGUMENT:: oscServPort
+The network port of the OSC server for OSC communication.
+returns:: The initialized instance of JMIntechControllers.
+
+METHOD:: getMIDIValue
+Registers a callback function to be executed when a MIDI value is received for a specific element.
+ARGUMENT:: elementKey
+The key representing a MIDI control element.
+ARGUMENT:: callbackFunc
+A Function to be called when the MIDI value for the specified element is received.
+returns:: nil
+
+METHOD:: midiOSC
+Enables or disables the sending of OSC messages for specified MIDI elements.
+ARGUMENT:: elementKeys
+An array of keys representing MIDI control elements.
+ARGUMENT:: enableFlag
+A boolean indicating whether OSC messages should be sent for the specified elements.
+returns:: nil
+
+METHOD:: oscServPort
+Provides access to the OSC server port property.
+returns:: The network port of the OSC server.
+
+METHOD:: inCB
+Creates an In.kr UGen instance for reading values from the control bus associated with a specific element key.
+ARGUMENT:: key
+The key representing a MIDI control element in the controlBusDict.
+returns:: An In.kr UGen instance.
+
+METHOD:: encCount, potCount, fadCount, butCount
+Provides access to the count of encoders, potentiometers, faders, and buttons, respectively.
+returns:: The count of the respective MIDI control element type.
+
+METHOD:: deviceFullName, midiChannel
+Provides access to the device's full name and the MIDI channel property, respectively.
+returns:: The full name of the MIDI device or the MIDI channel.
+
+METHOD:: elementDict
+Provides access to the dictionary storing MIDI elements.
+returns:: The IdentityDictionary storing MIDI elements.
+
+METHOD:: initializeMIDIElements
+Initializes MIDI elements such as potentiometers, encoders, faders, and buttons, and maps them to control buses and element dictionaries.
+returns:: nil
+
+METHOD:: triggerCallback
+Triggers the callback function registered for a specific MIDI element, passing the received value for processing.
+ARGUMENT:: elementKey
+The key representing a MIDI control element.
+ARGUMENT:: value
+The value to be passed to the callback function.
+returns:: nil
+
+EXAMPLES::
+
+code::
+// Initialize a JMIntechControllers instance for a generic MIDI device
+m = JMIntechControllers.new("Generic MIDI Device", "GMD", 1, "127.0.0.1", 57120);
+// Set up a callback for a MIDI element
+m.getMIDIValue(\pot1, {|val| ("Potentiometer 1 value: " ++ val).postln; });
+::

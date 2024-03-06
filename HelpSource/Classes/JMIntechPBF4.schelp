@@ -1,0 +1,51 @@
+TITLE:: JMIntechPBF4
+summary:: A subclass of JMIntechControllers designed for the Intech Studio PBF4 MIDI controller with potentiometers, buttons, and faders.
+categories:: Libraries>MIDI
+related:: Classes/JMIntechControllers
+
+DESCRIPTION::
+The JMIntechPBF4 class is specially tailored for the Intech Studio PBF4 MIDI controller, focusing on managing its combination of potentiometers, buttons, and faders. This class extends the capabilities of JMIntechControllers to accommodate the specific requirements of the PBF4 device, including initializing MIDI channels, setting control change (CC) numbers, and configuring OSC communication for its diverse control elements.
+
+CLASSMETHODS::
+
+METHOD:: classDeviceNumb
+Maintains a count of the JMIntechPBF4 instances created, ensuring each instance has a unique device number.
+returns:: The current count of JMIntechPBF4 instances, representing the unique device numbers assigned.
+
+METHOD:: new
+Instantiates a new JMIntechPBF4 object, assigning it a unique device number and initializing MIDI and OSC settings appropriate for the PBF4 controller.
+ARGUMENT:: midiChannel
+The MIDI channel assigned to the PBF4 device for sending MIDI messages (default is 0).
+ARGUMENT:: startCC
+The initial MIDI CC number for the first control element on the device (default is 64).
+ARGUMENT:: oscServAddr
+The network address of the OSC server for sending OSC messages (default is "127.0.0.1").
+ARGUMENT:: oscServPort
+The network port used for OSC communication (default is 9000).
+returns:: A newly configured JMIntechPBF4 object.
+
+INSTANCEMETHODS::
+
+METHOD:: startCC
+Provides access to the starting MIDI CC number assigned to the control elements on the PBF4 device.
+returns:: The initial MIDI CC number for the control elements.
+
+METHOD:: deviceNumb
+Retrieves the unique device number allocated to this JMIntechPBF4 instance.
+returns:: The unique device number for this instance.
+
+METHOD:: initPBF4
+Initializes the PBF4 device, configuring the MIDI settings for its potentiometers, buttons, and faders.
+ARGUMENT:: startCC
+Specifies the starting MIDI CC number for the first control element on the device.
+returns:: nil, indicating that the device has been successfully initialized.
+
+EXAMPLES::
+
+code::
+// Creating a new JMIntechPBF4 instance with default settings
+~pbf4 = JMIntechPBF4(midiChannel: 0, startCC: 64, oscServAddr: "127.0.0.1", oscServPort: 9000);;
+
+// Optionally, customizing the starting CC number for the control elements
+~pbf4.initPBF4(70);  // Initializes the device with control elements starting at MIDI CC 70
+::

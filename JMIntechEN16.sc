@@ -13,6 +13,6 @@ JMIntechEN16 : JMIntechControllers {
         this.startCC = startCC;
         this.encCount = 16;
         this.butCount = 16;
-        super.buildElementsDict;
+        super.initializeMIDIElements;
     }
 }

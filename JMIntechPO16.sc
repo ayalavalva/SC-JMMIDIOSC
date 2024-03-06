@@ -12,6 +12,6 @@ JMIntechPO16 : JMIntechControllers {
         this.deviceNumb = classDeviceNumb;
         this.startCC = startCC;
         this.potCount = 16;
-        super.buildElementsDict;
+        super.initializeMIDIElements;
     }
 }

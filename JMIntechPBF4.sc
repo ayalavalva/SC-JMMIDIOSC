@@ -14,6 +14,6 @@ JMIntechPBF4 : JMIntechControllers {
         this.potCount = 4;
         this.fadCount = 4;
         this.butCount = 4;
-        super.buildElementsDict;
+        super.initializeMIDIElements;
     }
 }

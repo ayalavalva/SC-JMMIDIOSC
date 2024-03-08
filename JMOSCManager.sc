@@ -24,8 +24,8 @@ JMOSCManager { // A class designed to handle OSC (Open Sound Control) communicat
     }
 
     // Method to send an OSC message to the configured address and port. It constructs the OSC message with the provided path and arguments.
-    send { |oscPath, args|
-    "Sending OSC Message to Address: % Value: %".format(oscPath, args).postln; // Log the outgoing OSC message for debugging.
+    send { |oscPath, args, debug = true|
+        if (debug) {"Sending OSC Message to Address: % Value: %".format(oscPath, args).postln}; // Log the outgoing OSC message for debugging.
         this.oscAddr.sendMsg(oscPath, *args); // Use the OSC client to send the message.
     }
 }

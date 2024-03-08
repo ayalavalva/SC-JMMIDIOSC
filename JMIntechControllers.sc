@@ -75,8 +75,8 @@ JMIntechControllers {
         this.midiValueDict.put(elementKey, callbackFunc);
     }
 
-     // Method that looks up and executes the callback function associated with a given element key, passing the provided value to the function.
-     triggerCallback { |elementKey, value|
+    // Method that looks up and executes the callback function associated with a given element key, passing the provided value to the function.
+    triggerCallback { |elementKey, value|
         var midiValue = this.midiValueDict.at(elementKey);
         if (midiValue.notNil) {
             midiValue.value(value);

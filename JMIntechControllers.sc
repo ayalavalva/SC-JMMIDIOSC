@@ -1,8 +1,9 @@
 JMIntechControllers {
     var <>deviceFullName, <>deviceShortName, <>midiChannel, <>oscServAddr, <>oscServPort; // Device identifiers
     var <>potCount = 0, <>encCount = 0, <>fadCount = 0, <>butCount = 0; // Counts of different control elements
-    var <>controlBusDict; // Dictionary to store control bus for each element
     var <>elementDict; // Dictionary to store element objects
+    var <>controlBusDict; // Dictionary to store control bus for each element
+    var <>oscPathDict; // Dictionary to store OSC path for each element
     var <>midiValueDict; // Dictionary to store callback functions for each element
     var <>deviceNumb; // Device number (number of instances of PO16, EN16 and PBF4 devices created)
 
@@ -21,6 +22,8 @@ JMIntechControllers {
         // Initialize dictionaries based on the counts of different MIDI control elements.
         this.elementDict = IdentityDictionary.new(n: potCount + encCount + fadCount + butCount); // Initialize element dictionary
         this.controlBusDict = IdentityDictionary.new(n: potCount + encCount + fadCount + butCount); // Initialize control bus dictionary
+        this.oscPathDict = IdentityDictionary.new(n: potCount + encCount + fadCount + butCount); // Initialize MIDI value dictionary
+
         this.midiValueDict = IdentityDictionary.new(n: potCount + encCount + fadCount + butCount); // Initialize MIDI value dictionary
     }
     
@@ -32,7 +35,7 @@ JMIntechControllers {
             var msbCC = this.startCC + i; // Most significant byte CC is starting from the startCC number
             var lsbCC = msbCC + this.potCount + this.fadCount + this.butCount;
             var elementKey = "PO%".format(elementNumber).asSymbol;
-            var element = JMElementPotentiometer.new(this, this.deviceFullName, this.deviceShortName, this.deviceNumb, elementNumber, this.midiChannel, msbCC, lsbCC);
+            var element = JMElementPotentiometer.new(this, this.deviceFullName, this.deviceShortName, this.deviceNumb, elementNumber, this.midiChannel, this.deviceOSCpath, msbCC, lsbCC);
             this.elementDict.put(elementKey, element);
             this.controlBusDict.put(elementKey, element.controlBus);
             (this.deviceFullName ++ (if (this.deviceShortName == "PBF4") {" (%)".format(this.deviceNumb)} {""}) + "Potentiometer" + elementNumber + "MIDI Channel" + this.midiChannel + "msbCC" + msbCC + "lsbCC" + lsbCC).postln;
@@ -42,7 +45,7 @@ JMIntechControllers {
             var elementNumber = i + 1;
             var cc = potCount + this.startCC + i;
             var elementKey = "EN%".format(elementNumber).asSymbol;
-            var element = JMElementEncoder.new(this, this.deviceFullName, this.deviceShortName, this.deviceNumb, elementNumber, this.midiChannel, cc);
+            var element = JMElementEncoder.new(this, this.deviceFullName, this.deviceShortName, this.deviceNumb, elementNumber, this.midiChannel, this.deviceOSCpath, cc);
             this.elementDict.put(elementKey, element);
             this.controlBusDict.put(elementKey, element.controlBus);
             (this.deviceFullName ++ (if (this.deviceShortName == "PBF4") {" (%)".format(this.deviceNumb)} {""}) + "Encoder" + elementNumber + "MIDI Channel" + this.midiChannel + "CC" + cc).postln;
@@ -53,7 +56,7 @@ JMIntechControllers {
             var msbCC = potCount + this.startCC + i;
             var lsbCC = msbCC + this.fadCount + this.potCount + this.butCount;
             var elementKey = "FA%".format(elementNumber).asSymbol;
-            var element = JMElementFader.new(this, this.deviceFullName, this.deviceShortName, this.deviceNumb, elementNumber, this.midiChannel, msbCC, lsbCC);
+            var element = JMElementFader.new(this, this.deviceFullName, this.deviceShortName, this.deviceNumb, elementNumber, this.midiChannel, this.deviceOSCpath, msbCC, lsbCC);
             this.elementDict.put(elementKey, element);
             this.controlBusDict.put(elementKey, element.controlBus);
             (this.deviceFullName ++ (if (this.deviceShortName == "PBF4") {" (%)".format(this.deviceNumb)} {""}) + "Fader" + elementNumber + "MIDI Channel" + this.midiChannel + "msbCC" + msbCC + "lsbCC" + lsbCC).postln;
@@ -63,7 +66,7 @@ JMIntechControllers {
             var elementNumber = i + 1;
             var cc = potCount + fadCount + encCount + this.startCC + i;
             var elementKey = "BU%".format(elementNumber).asSymbol;
-            var element = JMElementButton.new(this, this.deviceFullName, this.deviceShortName, this.deviceNumb, elementNumber, this.midiChannel, cc);
+            var element = JMElementButton.new(this, this.deviceFullName, this.deviceShortName, this.deviceNumb, elementNumber, this.midiChannel, this.deviceOSCpath, cc);
             this.elementDict.put(elementKey, element);
             this.controlBusDict.put(elementKey, element.controlBus);
             (this.deviceFullName ++ (if (this.deviceShortName == "PBF4") {" (%)".format(this.deviceNumb)} {""}) + "Button" + elementNumber + "MIDI Channel" + this.midiChannel + "CC" + cc).postln;
@@ -84,18 +87,18 @@ JMIntechControllers {
     }   
     
     // Utility method to retrieve a control bus for a specific element key.
-    cb { |key|
-        ^this.controlBusDict.at(key);
+    cb { |elementKey|
+        ^this.controlBusDict.at(elementKey);
     }
 
     // Utility method to create an In.kr UGen instance for a specific control bus, allowing integration into SynthDefs
-    inCB { |key|
-        ^In.kr(this.cb(key), 1);
+    inCB { |elementKey|
+        ^In.kr(this.cb(elementKey), 1);
     }
 
     // Utility method wrapping the inCB method with Lag.kr, providing smoothed control change handling (useful for control buses modulating frequencies or amplitudes of audio signals))
-    lagInCB { |key, lag = 0.3|
-        ^Lag.kr(this.inCB(key), lag); 
+    lagInCB { |elementKey, lag = 0.3|
+        ^Lag.kr(this.inCB(elementKey), lag); 
     }
 
     // Enables or disables OSC sending for specified element keys, controlling whether MIDI values are forwarded as OSC messages.
@@ -104,6 +107,14 @@ JMIntechControllers {
             var element = this.elementDict.at(key);
             element.oscSendEnabled = enableFlag;
         };
+    }
+
+    // Sends OSC messages for specified element keys, using the provided OSC path and value.
+    sendOSCLabel { |args|
+        args.keysValuesDo({ |elementKey, value|
+            var element = this.elementDict.at(elementKey);
+            element.sendOSCLabel(value);
+        });
     }
 
     // Frees resources and decreases the device count when a device instance is no longer needed.

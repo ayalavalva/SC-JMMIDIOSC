@@ -53,6 +53,14 @@ The `JMIntechControllers` class is an abstract superclass class which provides a
 
 The `JMIntechControllers` class is not used directly. It is used as an abstract superclass for the `JMIntechPO16`, `JMIntechEN16` and `JMIntechPBF4` classes.
 
+## JMIntechPO16
+
+### Overview
+
+The `JMIntechPO16` class is a subclass of the `JMIntechControllers` class. It provides a set of methods and properties for controlling the PO16 MIDI controller and handling OSC communication.
+
+### Properties
+
 ## JMElementButton
 
 The `JMElementButton` class represents a MIDI button element. It inherits from the `JMMIDIElements` class.

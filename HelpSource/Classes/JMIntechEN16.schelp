@@ -1,0 +1,51 @@
+TITLE:: JMIntechEN16
+summary:: A subclass of JMIntechControllers for the Intech Studio EN16 MIDI controller with 16 encoders.
+categories:: Libraries>MIDI
+related:: Classes/JMIntechControllers
+
+DESCRIPTION::
+The JMIntechEN16 class is specifically designed for the Intech Studio EN16 MIDI controller, focusing on managing its 16 encoders. This class extends JMIntechControllers to provide functionalities that are tailored to the unique requirements of the EN16 device, including initializing MIDI channels, control change (CC) numbers for encoders, and OSC communication settings.
+
+CLASSMETHODS::
+
+METHOD:: classDeviceNumb
+Keeps track of the total number of JMIntechEN16 instances created, ensuring a unique device number for each instance.
+returns:: The total count of JMIntechEN16 instances, representing unique device numbers.
+
+METHOD:: new
+Instantiates a new JMIntechEN16 object, automatically assigning a unique device number and initializing MIDI and OSC configurations suitable for the EN16 controller.
+ARGUMENT:: midiChannel
+Specifies the MIDI channel the EN16 device will use for communication (default is 0).
+ARGUMENT:: startCC
+Defines the starting MIDI CC number for the first encoder (default is 32).
+ARGUMENT:: oscServAddr
+Sets the network address of the OSC server for sending messages (default is "127.0.0.1").
+ARGUMENT:: oscServPort
+Sets the network port for the OSC server communication (default is 9000).
+returns:: A new JMIntechEN16 object configured with the specified settings.
+
+INSTANCEMETHODS::
+
+METHOD:: startCC
+Accesses the starting MIDI CC number allocated for the encoders on the EN16 device.
+returns:: The starting MIDI CC number for the encoders.
+
+METHOD:: deviceNumb
+Retrieves the unique device number assigned to the instance of JMIntechEN16.
+returns:: The unique device number for this instance.
+
+METHOD:: initEN16
+Prepares the EN16 device for use by setting up the MIDI configurations for its 16 encoders.
+ARGUMENT:: startCC
+The starting MIDI CC number to be used by the first encoder.
+returns:: nil, indicating the completion of the initialization process.
+
+EXAMPLES::
+
+code::
+// Creating a new JMIntechEN16 instance with default settings
+~en16 = JMIntechEN16(midiChannel: 0, startCC: 32, oscServAddr: "127.0.0.1", oscServPort: 9000);
+
+// Optionally, setting a different starting CC for encoders
+~en16.initEN16(40);  // Initializes the device with the first encoder's CC starting at 40
+::

@@ -1,5 +1,6 @@
 JMMIDIElements {
     var <>controller, <>deviceFullName, <>deviceShortName, <>deviceNumb, <>elementFullName, <>elementShortName, <>elementNumber, <>midiChannel, <>deviceOSCpath;
+    var <>triggerValue, <>triggered = false;
 
     *new { |controller, deviceFullName, deviceShortName, deviceNumb, elementFullName, elementShortName, elementNumber, midiChannel, deviceOSCpath|
         ^super.new(controller, deviceFullName, deviceShortName, deviceNumb, elementFullName, elementShortName, elementNumber, midiChannel, deviceOSCpath)
@@ -28,7 +29,9 @@ JMMIDIElements {
 
     midiValuetoControlBus7bit {
         var midiValue;
-        switch(this.elementShortName) { "EN" } {midiValue = (this.ccValue - 64).sign * ((this.ccValue - 64).abs.pow(3)).asInteger} { "BU" } {midiValue = this.ccValue.linlin(0, 127, 0, 1)};
+        switch(this.elementShortName) 
+            { "EN" } {midiValue = (this.ccValue - 64).sign * ((this.ccValue - 64).abs.pow(3)).asInteger} 
+            { "BU" } {midiValue = this.ccValue.linlin(0, 127, 0, 1)};
         this.controlBus.set(midiValue);
         (this.deviceFullName ++ (if (this.deviceShortName == "PBF4") {" (" ++ this.deviceNumb ++ ")"} {""}) + (switch(this.elementShortName) {"EN"} {"Encoder"} {"BU"} {"Button"}) + this.elementNumber + "MIDI Channel" + this.midiChannel + "CC" + this.cc ++ ":" + midiValue).postln;
         this.midiToOSCValue = midiValue; // Update the midiToOSCValue with the new MIDI value
@@ -57,10 +60,31 @@ JMMIDIElements {
 
     midiValuetoControlBus14bit {
         if (this.msbUpdated && this.lsbUpdated) {
+            var busValue;
             var midiValue = ((this.msbCCValue << 7) + this.lsbCCValue).linlin(0, 16383, 0, 1);
-            this.controlBus.set(midiValue);
-            (this.deviceFullName ++ (if (this.deviceShortName == "PBF4") {" (" ++ this.deviceNumb ++ ")"} {""}) + this.elementFullName + this.elementNumber + "MIDI Channel" + this.midiChannel + "msbCC" + this.msbCC + "lsbCC" + this.lsbCC ++ ":" + midiValue).postln;
-            this.midiToOSCValue = midiValue; // Update the midiToOSCValue with the new MIDI value
+            
+            if (this.triggerValue.isNil) 
+            {busValue = midiValue;} // If triggerValue is not set, use midiValue directly
+            {
+                // Check if midiValue is within the 1% range of triggerValue
+                if ((midiValue - this.triggerValue).abs < (this.triggerValue * 0.01)) // Check if midiValue is within the 1% range of triggerValue
+                {
+                    if (this.triggered.not) // If entering the 1% range for the first time, set the triggered flag and use midiValue
+                    {this.triggered = true; busValue = midiValue;} // Set flag on first entry into the range
+                    {busValue = midiValue;} // Keep busValue as the last midiValue within the range after the flag is set
+                } 
+                {
+                    if (this.triggered.not) // If outside the 1% range and the triggered flag has not been set, use triggerValue
+                    {busValue = this.triggerValue;} 
+                    {busValue = midiValue;} // If triggered flag is set, continue using the last midiValue within the 1% range
+                }
+            };
+
+            this.controlBus.set(busValue);
+
+            (this.deviceFullName ++ (if (this.deviceShortName == "PBF4") {" (" ++ this.deviceNumb ++ ")"} {""}) + this.elementFullName + this.elementNumber + "MIDI Channel" + this.midiChannel + "msbCC" + this.msbCC + "lsbCC" + this.lsbCC ++ ":" + busValue).postln;
+
+            this.midiToOSCValue = busValue; // Update the midiToOSCValue with the new MIDI value
 
             this.controller.triggerCallback((this.elementShortName ++ this.elementNumber).asSymbol, midiValue); // Trigger the callback for the element to get the value in patch code
 

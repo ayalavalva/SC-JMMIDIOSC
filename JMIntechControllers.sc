@@ -109,6 +109,11 @@ JMIntechControllers {
         };
     }
 
+    setTriggerValue { |elementKey, value|
+        var element = this.elementDict.at(elementKey);
+        element.triggerValue = value;
+    }
+
     // Sends OSC messages for specified element keys, using the provided OSC path and value.
     sendOSCLabel { |args|
         args.keysValuesDo({ |elementKey, value|

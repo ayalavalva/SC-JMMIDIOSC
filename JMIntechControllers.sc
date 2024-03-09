@@ -1,10 +1,11 @@
 JMIntechControllers {
-    var <>deviceFullName, <>deviceShortName, <>midiChannel, <>oscServAddr, <>oscServPort;
-    var <>potCount = 0, <>encCount = 0, <>fadCount = 0, <>butCount = 0;
-    var <>controlBusDict;
-    var <>elementDict;
-    var <>midiValueDict;
-    var <>deviceNumb;
+    var <>deviceFullName, <>deviceShortName, <>midiChannel, <>oscServAddr, <>oscServPort; // Device identifiers
+    var <>potCount = 0, <>encCount = 0, <>fadCount = 0, <>butCount = 0; // Counts of different control elements
+    var <>elementDict; // Dictionary to store element objects
+    var <>controlBusDict; // Dictionary to store control bus for each element
+    var <>oscPathDict; // Dictionary to store OSC path for each element
+    var <>midiValueDict; // Dictionary to store callback functions for each element
+    var <>deviceNumb; // Device number (number of instances of PO16, EN16 and PBF4 devices created)
 
     *new { |deviceFullName, deviceShortName, midiChannel, oscServAddr, oscServPort|
         ^super.new.init(deviceFullName, deviceShortName, midiChannel, oscServAddr, oscServPort)
@@ -18,9 +19,12 @@ JMIntechControllers {
         this.oscServAddr = oscServAddr;
         this.oscServPort = oscServPort;
 
-        this.controlBusDict = IdentityDictionary.new(n: potCount + encCount + fadCount + butCount);
-        this.elementDict = IdentityDictionary.new(n: potCount + encCount + fadCount + butCount);
-        this.midiValueDict = IdentityDictionary.new(n: potCount + encCount + fadCount + butCount);
+        // Initialize dictionaries based on the counts of different MIDI control elements.
+        this.elementDict = IdentityDictionary.new(n: potCount + encCount + fadCount + butCount); // Initialize element dictionary
+        this.controlBusDict = IdentityDictionary.new(n: potCount + encCount + fadCount + butCount); // Initialize control bus dictionary
+        this.oscPathDict = IdentityDictionary.new(n: potCount + encCount + fadCount + butCount); // Initialize MIDI value dictionary
+
+        this.midiValueDict = IdentityDictionary.new(n: potCount + encCount + fadCount + butCount); // Initialize MIDI value dictionary
     }
     
     initializeMIDIElements {
@@ -30,7 +34,8 @@ JMIntechControllers {
             var msbCC = this.startCC + i;
             var lsbCC = msbCC + this.potCount + this.fadCount + this.butCount;
             var elementKey = "PO%".format(elementNumber).asSymbol;
-            var element = JMElementPotentiometer.new(this, this.deviceFullName, this.deviceShortName, this.deviceNumb, elementNumber, this.midiChannel, msbCC, lsbCC);
+            var element = JMElementPotentiometer.new(this, this.deviceFullName, this.deviceShortName, this.deviceNumb, elementNumber, this.midiChannel, this.deviceOSCpath, msbCC, lsbCC);
+            this.elementDict.put(elementKey, element);
             this.controlBusDict.put(elementKey, element.controlBus);
             this.elementDict.put(elementKey, element);
             (this.deviceFullName ++ (if (this.deviceShortName == "PBF4") {" (%)".format(this.deviceNumb)} {""}) + "Potentiometer" + elementNumber + "MIDI Channel" + this.midiChannel + "msbCC" + msbCC + "lsbCC" + lsbCC).postln;
@@ -40,7 +45,8 @@ JMIntechControllers {
             var elementNumber = i + 1;
             var cc = potCount + this.startCC + i;
             var elementKey = "EN%".format(elementNumber).asSymbol;
-            var element = JMElementEncoder.new(this, this.deviceFullName, this.deviceShortName, this.deviceNumb, elementNumber, this.midiChannel, cc);
+            var element = JMElementEncoder.new(this, this.deviceFullName, this.deviceShortName, this.deviceNumb, elementNumber, this.midiChannel, this.deviceOSCpath, cc);
+            this.elementDict.put(elementKey, element);
             this.controlBusDict.put(elementKey, element.controlBus);
             this.elementDict.put(elementKey, element);
             (this.deviceFullName ++ (if (this.deviceShortName == "PBF4") {" (%)".format(this.deviceNumb)} {""}) + "Encoder" + elementNumber + "MIDI Channel" + this.midiChannel + "CC" + cc).postln;
@@ -51,7 +57,8 @@ JMIntechControllers {
             var msbCC = potCount + this.startCC + i;
             var lsbCC = msbCC + this.fadCount + this.potCount + this.butCount;
             var elementKey = "FA%".format(elementNumber).asSymbol;
-            var element = JMElementFader.new(this, this.deviceFullName, this.deviceShortName, this.deviceNumb, elementNumber, this.midiChannel, msbCC, lsbCC);
+            var element = JMElementFader.new(this, this.deviceFullName, this.deviceShortName, this.deviceNumb, elementNumber, this.midiChannel, this.deviceOSCpath, msbCC, lsbCC);
+            this.elementDict.put(elementKey, element);
             this.controlBusDict.put(elementKey, element.controlBus);
             this.elementDict.put(elementKey, element);
             (this.deviceFullName ++ (if (this.deviceShortName == "PBF4") {" (%)".format(this.deviceNumb)} {""}) + "Fader" + elementNumber + "MIDI Channel" + this.midiChannel + "msbCC" + msbCC + "lsbCC" + lsbCC).postln;
@@ -61,7 +68,8 @@ JMIntechControllers {
             var elementNumber = i + 1;
             var cc = potCount + fadCount + encCount + this.startCC + i;
             var elementKey = "BU%".format(elementNumber).asSymbol;
-            var element = JMElementButton.new(this, this.deviceFullName, this.deviceShortName, this.deviceNumb, elementNumber, this.midiChannel, cc);
+            var element = JMElementButton.new(this, this.deviceFullName, this.deviceShortName, this.deviceNumb, elementNumber, this.midiChannel, this.deviceOSCpath, cc);
+            this.elementDict.put(elementKey, element);
             this.controlBusDict.put(elementKey, element.controlBus);
             this.elementDict.put(elementKey, element);
             (this.deviceFullName ++ (if (this.deviceShortName == "PBF4") {" (%)".format(this.deviceNumb)} {""}) + "Button" + elementNumber + "MIDI Channel" + this.midiChannel + "CC" + cc).postln;
@@ -80,17 +88,20 @@ JMIntechControllers {
             midiValue.value(value);
         }
     }   
-
-    cb { |key|
-        ^this.controlBusDict.at(key);
+    
+    // Utility method to retrieve a control bus for a specific element key.
+    cb { |elementKey|
+        ^this.controlBusDict.at(elementKey);
     }
 
-    inCB { |key|
-        ^In.kr(this.cb(key), 1);
+    // Utility method to create an In.kr UGen instance for a specific control bus, allowing integration into SynthDefs
+    inCB { |elementKey|
+        ^In.kr(this.cb(elementKey), 1);
     }
 
-    lagInCB { |key, lag = 0.3|
-        ^Lag.kr(this.inCB(key), lag); 
+    // Utility method wrapping the inCB method with Lag.kr, providing smoothed control change handling (useful for control buses modulating frequencies or amplitudes of audio signals))
+    lagInCB { |elementKey, lag = 0.3|
+        ^Lag.kr(this.inCB(elementKey), lag); 
     }
 
     midiOSC { |elementKeys, enableFlag = true|
@@ -100,6 +111,15 @@ JMIntechControllers {
         };
     }
 
+    // Sends OSC messages for specified element keys, using the provided OSC path and value.
+    sendOSCLabel { |args|
+        args.keysValuesDo({ |elementKey, value|
+            var element = this.elementDict.at(elementKey);
+            element.sendOSCLabel(value);
+        });
+    }
+
+    // Frees resources and decreases the device count when a device instance is no longer needed.
     free {
         deviceNumb = deviceNumb - 1;
         this.controlBusDict.do { |key, value|

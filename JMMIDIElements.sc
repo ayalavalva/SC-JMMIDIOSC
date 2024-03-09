@@ -1,11 +1,11 @@
 JMMIDIElements {
-    var <>controller, <>deviceFullName, <>deviceShortName, <>deviceNumb, <>elementFullName, <>elementShortName, <>elementNumber, <>midiChannel;
+    var <>controller, <>deviceFullName, <>deviceShortName, <>deviceNumb, <>elementFullName, <>elementShortName, <>elementNumber, <>midiChannel, <>deviceOSCpath;
 
-    *new { |controller, deviceFullName, deviceShortName, deviceNumb, elementFullName, elementShortName, elementNumber, midiChannel|
-        ^super.new(controller, deviceFullName, deviceShortName, deviceNumb, elementFullName, elementShortName, elementNumber, midiChannel)
+    *new { |controller, deviceFullName, deviceShortName, deviceNumb, elementFullName, elementShortName, elementNumber, midiChannel, deviceOSCpath|
+        ^super.new(controller, deviceFullName, deviceShortName, deviceNumb, elementFullName, elementShortName, elementNumber, midiChannel, deviceOSCpath)
     }
 
-    init { |controller, deviceFullName, deviceShortName, deviceNumb, elementFullName, elementShortName, elementNumber, midiChannel|
+    init { |controller, deviceFullName, deviceShortName, deviceNumb, elementFullName, elementShortName, elementNumber, midiChannel, deviceOSCpath|
         this.controller = controller;
         this.deviceFullName = deviceFullName;
         this.deviceShortName = deviceShortName;
@@ -14,6 +14,7 @@ JMMIDIElements {
         this.elementShortName = elementShortName;
         this.elementNumber = elementNumber;
         this.midiChannel = midiChannel;
+        this.deviceOSCpath = deviceOSCpath;
     }
 
     midi7bitReceiver {
@@ -73,8 +74,11 @@ JMMIDIElements {
 
     sendMIDIValuetoOSC { // Send the OSC message only if oscSendEnabled is true
         if (this.oscSendEnabled) {
-            var oscPath = "/%/%".format(if(this.deviceShortName == "PBF4") {this.deviceShortName.toLower ++ "_" ++ this.deviceNumb} {this.deviceShortName.toLower}, this.elementShortName.toLower) ++ this.elementNumber.asString; // Construct the OSC path
-            JMOSCManager.getSharedInstance.send(oscPath, this.midiToOSCValue); // Send the value via OSC
+            
+            JMOSCManager.getSharedInstance.send(this.deviceOSCpath ++ this.elementOSCpath, this.midiToOSCValue); // Send the value via OSC
+            if (this.elementShortName != "BU") {
+                JMOSCManager.getSharedInstance.send(this.deviceOSCpath ++ this.label2OSCpath, (this.midiToOSCValue * 100).asInteger);
+            }; // Send the value via OSC
         }
     }
 
@@ -85,5 +89,9 @@ JMMIDIElements {
             this.controller.triggerCallback((this.elementShortName ++ this.elementNumber).asSymbol, oscValue); // Trigger the callback for the element to get the value in patch code
             (this.deviceFullName ++ (if (this.deviceShortName == "PBF4") {" (" ++ this.deviceNumb ++ ")"} {""}) + this.elementFullName + this.elementNumber + "OSC:" + oscValue).postln;
         }, "/%/%".format(if(this.deviceShortName == "PBF4") {this.deviceShortName.toLower ++ "_" ++ this.deviceNumb} {this.deviceShortName.toLower}, this.elementShortName.toLower) ++ this.elementNumber.asString;);
+    }
+
+    sendOSCLabel { |message|
+        JMOSCManager.getSharedInstance.send(this.deviceOSCpath ++ this.label1OSCpath, message);
     }
 }

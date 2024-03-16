@@ -1,6 +1,8 @@
 JMElementEncoder : JMMIDIElements {
     var <>cc;
     var <>ccValue;
+    var <>velocityFactor = 10;
+    var <>cumulativeEncoderValue = 0;
     var <>elementOSCpath;
     var <>label1OSCpath;
     var <>label2OSCpath;
@@ -14,6 +16,8 @@ JMElementEncoder : JMMIDIElements {
 
     initEncoder { |cc|
         this.cc = cc;
+        this.velocityFactor = velocityFactor;
+        this.cumulativeEncoderValue = cumulativeEncoderValue;
         this.controlBus = Bus.control(Server.default, 1);
         this.elementOSCpath = "/en" ++ this.elementNumber;
         this.label1OSCpath = this.elementOSCpath ++ "_lb1";

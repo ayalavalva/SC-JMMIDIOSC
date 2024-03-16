@@ -1,6 +1,7 @@
 JMMIDIElements {
     var <>controller, <>deviceFullName, <>deviceShortName, <>deviceNumb, <>elementFullName, <>elementShortName, <>elementNumber, <>midiChannel, <>deviceOSCpath;
-    var <>triggerValue, <>triggered = false;
+    var <>lowValue = 0, <>highValue = 1;
+    var <>triggerValue = nil, <>triggered = false;
 
     *new { |controller, deviceFullName, deviceShortName, deviceNumb, elementFullName, elementShortName, elementNumber, midiChannel, deviceOSCpath|
         ^super.new(controller, deviceFullName, deviceShortName, deviceNumb, elementFullName, elementShortName, elementNumber, midiChannel, deviceOSCpath)
@@ -29,8 +30,20 @@ JMMIDIElements {
 
     midiValuetoControlBus7bit {
         var midiValue;
+
         switch(this.elementShortName) 
-            { "EN" } {midiValue = (this.ccValue - 64).sign * ((this.ccValue - 64).abs.pow(3)).asInteger} 
+            { "EN" } {
+                var incrementMidiValue;
+                // Function to handle the cumulative logic for midiValue
+                incrementMidiValue = { |ccValue|
+                    var change = (ccValue - 64) * (this.velocityFactor / 1000);
+                    this.cumulativeEncoderValue = (this.cumulativeEncoderValue + change).clip(this.lowValue, this.highValue); // Ensure the value stays within the specified range
+                    // var addedValue = (ccValue - 64).sign * ((ccValue - 64).abs.pow(3)).asInteger;
+                    // this.cumulativeEncoderValue = this.cumulativeEncoderValue + addedValue; // Cumulatively update the value
+                    this.cumulativeEncoderValue; // Return the updated cumulative value
+                };
+                midiValue = incrementMidiValue.value(this.ccValue);
+            }
             { "BU" } {midiValue = this.ccValue.linlin(0, 127, 0, 1)};
         this.controlBus.set(midiValue);
         (this.deviceFullName ++ (if (this.deviceShortName == "PBF4") {" (" ++ this.deviceNumb ++ ")"} {""}) + (switch(this.elementShortName) {"EN"} {"Encoder"} {"BU"} {"Button"}) + this.elementNumber + "MIDI Channel" + this.midiChannel + "CC" + this.cc ++ ":" + midiValue).postln;
@@ -61,13 +74,13 @@ JMMIDIElements {
     midiValuetoControlBus14bit {
         if (this.msbUpdated && this.lsbUpdated) {
             var busValue;
-            var midiValue = ((this.msbCCValue << 7) + this.lsbCCValue).linlin(0, 16383, 0, 1);
+            var midiValue = ((this.msbCCValue << 7) + this.lsbCCValue).linlin(0, 16383, this.lowValue, this.highValue);
             
             if (this.triggerValue.isNil) 
             {busValue = midiValue;} // If triggerValue is not set, use midiValue directly
             {
                 // Check if midiValue is within the 1% range of triggerValue
-                if ((midiValue - this.triggerValue).abs < (this.triggerValue * 0.01)) // Check if midiValue is within the 1% range of triggerValue
+                if ((midiValue - this.triggerValue).abs < 0.01) // Check if midiValue is within the 1% range of triggerValue
                 {
                     if (this.triggered.not) // If entering the 1% range for the first time, set the triggered flag and use midiValue
                     {this.triggered = true; busValue = midiValue;} // Set flag on first entry into the range
@@ -113,6 +126,15 @@ JMMIDIElements {
             this.controller.triggerCallback((this.elementShortName ++ this.elementNumber).asSymbol, oscValue); // Trigger the callback for the element to get the value in patch code
             (this.deviceFullName ++ (if (this.deviceShortName == "PBF4") {" (" ++ this.deviceNumb ++ ")"} {""}) + this.elementFullName + this.elementNumber + "OSC:" + oscValue).postln;
         }, "/%/%".format(if(this.deviceShortName == "PBF4") {this.deviceShortName.toLower ++ "_" ++ this.deviceNumb} {this.deviceShortName.toLower}, this.elementShortName.toLower) ++ this.elementNumber.asString;);
+    }
+
+    // Methods called by JMIntechControllers setTriggerValue method to send initial trigger value to OSC element and label
+    sendTriggerValuetoOSC {
+        if (this.triggerValue.notNil) {
+            this.controlBus.set(triggerValue);
+            JMOSCManager.getSharedInstance.send(this.deviceOSCpath ++ this.elementOSCpath, this.triggerValue); 
+            JMOSCManager.getSharedInstance.send(this.deviceOSCpath ++ this.label2OSCpath, (this.triggerValue * 100).asInteger);// Send the value to OSC label};
+        };
     }
 
     sendOSCLabel { |message|

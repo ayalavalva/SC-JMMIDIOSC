@@ -112,6 +112,16 @@ JMIntechControllers {
     setTriggerValue { |elementKey, value|
         var element = this.elementDict.at(elementKey);
         element.triggerValue = value;
+        element.sendTriggerValuetoOSC;
+    }
+
+    setEncoderValues { |elementKey, lowValue, initialValue, highValue, velocityFactor = 10|
+        var element = this.elementDict.at(elementKey);
+        element.lowValue = lowValue;
+        element.cumulativeEncoderValue = initialValue; // see if we can replace cumulativeEncoderValue to triggerValue in encoder class to simplify code
+        element.highValue = highValue;
+        element.velocityFactor = velocityFactor;
+        element.sendTriggerValuetoOSC;
     }
 
     // Sends OSC messages for specified element keys, using the provided OSC path and value.

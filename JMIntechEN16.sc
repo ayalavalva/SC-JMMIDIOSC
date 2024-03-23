@@ -3,6 +3,7 @@ JMIntechEN16 : JMIntechControllers { // JMIntechEN16: A subclass of JMIntechCont
     var <>startCC; // Instance variables for the starting MIDI CC (Control Change) number 
     var <>deviceNumb; // Instance variables for the unique device number assigned to each instance
     var <>deviceOSCpath; // Instance variables for the OSC path for the device
+    var <>elementGroupOrder; // Instance variable with the order and the element count for each the element groups of the device
 
     // Constructor: Creates a new instance of JMIntechPO16 with optional parameters for MIDI channel, starting CC number, OSC server address, and port.
     *new { |midiChannel=0, startCC=32, deviceOSCpath="/en16", oscServAddr="127.0.0.1", oscServPort=9000|
@@ -15,8 +16,7 @@ JMIntechEN16 : JMIntechControllers { // JMIntechEN16: A subclass of JMIntechCont
         this.deviceNumb = classDeviceNumb; // Assign the unique device number from classDeviceNumb
         this.startCC = startCC; // Set the starting MIDI CC number for the potentiometers
         this.deviceOSCpath = deviceOSCpath; // Set the OSC path for the device
-        this.encCount = 16; // Specify that this device has 16 encoders
-        this.butCount = 16; // Specify that this device has 16 buttons
+        this.elementGroupOrder = [['EN', 16], ['BU', 16]]; // Set the element group order and element count for the device
         super.initializeMIDIElements; // Call the superclass's initializeMIDIElements method to set up the MIDI elements (encoders and buttons) for this device
     }
 }

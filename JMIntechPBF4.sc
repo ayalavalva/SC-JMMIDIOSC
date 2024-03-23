@@ -3,6 +3,7 @@ JMIntechPBF4 : JMIntechControllers { // JMIntechPBF4: A subclass of JMIntechCont
     var <>startCC; // Instance variables for the starting MIDI CC (Control Change) number 
     var <>deviceNumb; // Instance variables for the unique device number assigned to each instance
     var <>deviceOSCpath; // Instance variables for the OSC path for the device
+    var <>elementGroupOrder; // Instance variable with the order and the element count for each the element groups of the device
 
     // Constructor: Creates a new instance of JMIntechPO16 with optional parameters for MIDI channel, starting CC number, OSC server address, and port.
     *new { |midiChannel=0, startCC=64, deviceOSCpath="/pbf4", oscServAddr="127.0.0.1", oscServPort=9000|
@@ -15,9 +16,7 @@ JMIntechPBF4 : JMIntechControllers { // JMIntechPBF4: A subclass of JMIntechCont
         this.deviceNumb = classDeviceNumb; // Assign the unique device number from classDeviceNumb
         this.startCC = startCC; // Set the starting MIDI CC number for the potentiometers
         this.deviceOSCpath = deviceOSCpath ++ "_" ++ this.deviceNumb; // Set the OSC path for the device
-        this.potCount = 4; // Specify that this device has 4 potentiometers
-        this.fadCount = 4; // Specify that this device has 4 faders
-        this.butCount = 4; // Specify that this device has 4 buttons
+        this.elementGroupOrder = [['PO', 4], ['FA', 4], ['BU', 4]]; // Set the element group order and element count for the device
         super.initializeMIDIElements; // Call the superclass's initializeMIDIElements method to set up the MIDI elements (potentiometers, faders and buttons) for this device
     }
 }

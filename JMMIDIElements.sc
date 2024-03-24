@@ -46,7 +46,7 @@ JMMIDIElements {
     }
 
     midiValuetoControlBus {
-        this.midiValueToControlBusValue; // calls superclass method to convert MIDI value to control bus value
+        this.midiValueToControlBusValue; // calls superclass or subclass overriding methods to convert MIDI value to control bus value
         this.controlBus.set(this.busValue); // sets the control bus to busValue
         this.postMIDIElementDetails; // calls method to post element details to the post window
         this.triggerCallback(this.busValue); // Calls a method that triggers the callback for the element to get the value in patch code ('controller' is a reference to the JMIntechControllers instance managing this element)

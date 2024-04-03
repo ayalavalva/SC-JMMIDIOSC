@@ -20,4 +20,7 @@ JMElementButton : JMMIDIElements {
     midiValueToControlBusValue {
         this.busValue = this.ccValue.linlin(0, 127, this.lowValue, this.highValue);
     }
+
+    sendBusValuetoOSClabel2 {
+    }
 }

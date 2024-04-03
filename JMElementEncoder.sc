@@ -25,12 +25,26 @@ JMElementEncoder : JMMIDIElements {
         // Function to handle the cumulative logic for midiValue
         incrementMidiValue = { |ccValue|
             var midiValue = (ccValue - 64) * (this.velocityFactor / 1000);
-            this.initValue = (this.initValue + midiValue).clip(this.lowValue, this.highValue); // Ensure the value stays within the specified range
+            // Check if both 'this.lowValue' and 'this.highValue' are non-nil
+            if(this.lowValue.notNil and: { this.highValue.notNil }) {
+                // If both are non-nil, apply clipping to ensure the value stays within the specified range
+                this.initValue = (this.initValue + midiValue).clip(this.lowValue, this.highValue);
+            } {
+                // If either is nil, just add the 'midiValue' without clipping
+                this.initValue = this.initValue + midiValue;
+            };
             this.initValue; // Return the updated cumulative value
         }; 
 
         if (this.initValue.isNil)
         { this.initValue = 0; this.busValue = incrementMidiValue.value(this.ccValue); }
         { this.busValue = incrementMidiValue.value(this.ccValue); }
+    }
+
+    sendBusValuetoOSClabel2 {
+        if(this.lowValue.notNil and: { this.highValue.notNil }) {
+            // If both are non-nil, apply clipping to ensure the value stays within the specified range
+            JMOSCManager.getSharedInstance.send(this.deviceOSCpath ++ this.label2OSCpath, (this.busValue).asInteger);
+        };
     }
 }

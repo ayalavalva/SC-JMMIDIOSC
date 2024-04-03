@@ -91,10 +91,6 @@ JMMIDIElements {
         JMOSCManager.getSharedInstance.send(this.deviceOSCpath ++ this.label1OSCpath, message);
     }
 
-    sendBusValuetoOSClabel2 {
-        if (this.elementShortName != "BU") { JMOSCManager.getSharedInstance.send(this.deviceOSCpath ++ this.label2OSCpath, (this.busValue * 100).asInteger); };
-    }
-
     // Listens for OSC messages and sets the control bus value
     receiveOSCValuetoControlBus {
         OSCdef(("%%".format(if(this.deviceShortName == "PBF4") {this.deviceShortName.toLower ++ "_" ++ this.deviceNumb} {this.deviceShortName.toLower}, this.elementShortName.toLower) ++ this.elementNumber).asSymbol, { |msg|
@@ -124,7 +120,7 @@ JMMIDIElements {
         };
     }
 
-    triggerCallback { |value|
-        this.controller.triggerCallback((this.elementShortName ++ this.elementNumber).asSymbol, value); // Trigger the callback for the element to get the value in patch code ('controller' is a reference to the JMIntechControllers instance managing this element)
+    triggerCallback { |busValue|
+        this.controller.triggerCallback((this.elementShortName ++ this.elementNumber).asSymbol, busValue); // Trigger the callback for the element to get the value in patch code ('controller' is a reference to the JMIntechControllers instance managing this element)
     }
 }

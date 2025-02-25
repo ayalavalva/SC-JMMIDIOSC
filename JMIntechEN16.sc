@@ -16,7 +16,7 @@ JMIntechEN16 : JMIntechControllers { // JMIntechEN16: A subclass of JMIntechCont
         this.deviceNumb = classDeviceNumb; // Assign the unique device number from classDeviceNumb
         this.startCC = startCC; // Set the starting MIDI CC number for the potentiometers
         this.deviceOSCpath = deviceOSCpath; // Set the OSC path for the device
-        this.elementGroupOrder = [['EN', 16], ['BU', 16]]; // Set the element group order and element count for the device
+        this.elementGroupOrder = [['EN', 16], ['BU', 16]]; // Set the element groups [type, count] and their order for the device
         super.initializeMIDIElements; // Call the superclass's initializeMIDIElements method to set up the MIDI elements (encoders and buttons) for this device
     }
 }

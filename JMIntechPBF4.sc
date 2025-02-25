@@ -16,7 +16,7 @@ JMIntechPBF4 : JMIntechControllers { // JMIntechPBF4: A subclass of JMIntechCont
         this.deviceNumb = classDeviceNumb; // Assign the unique device number from classDeviceNumb
         this.startCC = startCC; // Set the starting MIDI CC number for the potentiometers
         this.deviceOSCpath = deviceOSCpath ++ "_" ++ this.deviceNumb; // Set the OSC path for the device
-        this.elementGroupOrder = [['PO', 4], ['FA', 4], ['BU', 4]]; // Set the element group order and element count for the device
+        this.elementGroupOrder = [['PO', 4], ['FA', 4], ['BU', 4]]; // Set the element groups [type, count] and their order for the device
         super.initializeMIDIElements; // Call the superclass's initializeMIDIElements method to set up the MIDI elements (potentiometers, faders and buttons) for this device
     }
 }

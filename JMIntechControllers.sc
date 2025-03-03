@@ -63,7 +63,7 @@ JMIntechControllers {
                 
                 var elementKey = (element.elementShortName ++ elementNumber).asSymbol; // Generate a unique key for the element based on its type and number (important for methods below)
 
-                // Prints initialization details to the console
+                // Prints initialization details to the console (using method in JMMIDIElenent abstract class)
                 switch(element.elementShortName.asSymbol)
                 {'PO'} { element.postMIDIElementDetails; }
                 {'EN'} { element.postMIDIElementDetails; }

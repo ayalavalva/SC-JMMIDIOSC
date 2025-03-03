@@ -1,7 +1,7 @@
 JMMIDIElements {
     var <>controller, <>deviceFullName, <>deviceShortName, <>deviceNumb, <>elementFullName, <>elementShortName, <>elementNumber, <>midiChannel, <>deviceOSCpath;
     var <>controlBus;
-    var <>lowValue = 0, <>highValue = 1;
+    var <>lowValue = 0, <>highValue = 1; // Could be renamed to minControlBusValue and maxControlBusValue for more clarity
     var <>initValue = nil, <>initTriggered = false;
     var <>busValue = 0;
     var <>oscSendEnabled = true; // I honestly don't see the point of keeping this flag (and the method in JMIntechControllers). All elements should always send their busValue to both the widget and the label2
@@ -55,7 +55,7 @@ JMMIDIElements {
 
     // Handles the conversion of MIDI values to control bus values for 14-bit MIDI elements
     midiValueToControlBusValue {
-        var midiValue = ((this.msbCCValue << 7) + this.lsbCCValue).linlin(0, 16383, this.lowValue, this.highValue);
+        var midiValue = ((this.msbCCValue << 7) + this.lsbCCValue).linlin(0, 16383, this.lowValue, this.highValue); // Bitwise left shift by 7 positions of the MSB value (same as * 128) and add the LSB value to get the 14-bit MIDI value, then linearly map it to the control bus range
             
             if (this.initValue.isNil) 
             {this.busValue = midiValue;} // If initValue is not set, use midiValue directly

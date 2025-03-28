@@ -41,7 +41,7 @@ JMOSCManager { // A class designed to handle OSC (Open Sound Control) communicat
     }
 
     // Class method to obtain a shared instance of the JMOSCManager. If no instance exists, one is created. This ensures that only one instance is used throughout the application.
-    *getSharedInstance { |oscServAddr = "127.0.0.1", oscServPort = 9000|
+    *getSharedInstance { |oscServAddr = "127.0.0.1", oscServPort = 9000| // Default Open Stage Control OSC server IP address and port
         if(sharedInstance.isNil, { // Check if the sharedInstance is not initialized.
             sharedInstance = this.new(oscServAddr, oscServPort); // Create a new instance with default or provided parameters.
         });

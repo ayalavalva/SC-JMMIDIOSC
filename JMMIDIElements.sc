@@ -8,12 +8,13 @@ JMMIDIElements {
     var <>elementOSCpath;
     var <>label1OSCpath;
     var <>label2OSCpath;
+    var <>postMIDIOSC; // Flag to control whether to post MIDI and OSC messages to the post window
 
-    *new { |controller, deviceFullName, deviceShortName, deviceNumb, elementFullName, elementShortName, elementNumber, midiChannel, deviceOSCpath|
-        ^super.new(controller, deviceFullName, deviceShortName, deviceNumb, elementFullName, elementShortName, elementNumber, midiChannel, deviceOSCpath)
+    *new { |controller, deviceFullName, deviceShortName, deviceNumb, elementFullName, elementShortName, elementNumber, midiChannel, deviceOSCpath, postMIDIOSC|
+        ^super.new(controller, deviceFullName, deviceShortName, deviceNumb, elementFullName, elementShortName, elementNumber, midiChannel, deviceOSCpath, postMIDIOSC)
     }
 
-    init { |controller, deviceFullName, deviceShortName, deviceNumb, elementFullName, elementShortName, elementNumber, midiChannel, deviceOSCpath|
+    init { |controller, deviceFullName, deviceShortName, deviceNumb, elementFullName, elementShortName, elementNumber, midiChannel, deviceOSCpath, postMIDIOSC|
         this.controller = controller;
         this.deviceFullName = deviceFullName;
         this.deviceShortName = deviceShortName;
@@ -24,6 +25,7 @@ JMMIDIElements {
         this.midiChannel = midiChannel;
         this.deviceOSCpath = deviceOSCpath;
         this.controlBus = Bus.control(Server.default, 1);
+        this.postMIDIOSC = postMIDIOSC; // Set the flag to control whether to post MIDI and OSC messages to the post window
     }
 
     midi7bitReceiver {
@@ -48,7 +50,7 @@ JMMIDIElements {
     midiValuetoControlBus {
         this.midiValueToControlBusValue; // calls superclass or subclass overriding methods to convert MIDI value to control bus value
         this.controlBus.set(this.busValue); // sets the control bus to busValue
-        this.postMIDIElementDetails; // calls method to post element details to the post window
+        if (this.postMIDIOSC) { this.postMIDIElementDetails; }; // calls method to post element details to the post window
         this.triggerCallback(this.busValue); // Calls a method that triggers the callback for the element to get the value in patch code ('controller' is a reference to the JMIntechControllers instance managing this element)
         if (this.oscSendEnabled) { this.sendBusValuetoOSCElement; this.sendBusValuetoOSClabel2 }; // Sends the bus value to the OSC element and label2
     }
@@ -101,7 +103,7 @@ JMMIDIElements {
             var oscValue = if(this.elementShortName == "BU") {msg[1].asInteger} {msg[1].asFloat}; // forces the value to be an integer for buttons
             this.controlBus.set(oscValue);
             this.triggerCallback(oscValue); // Calls a method that triggers the callback for the element to get the value in patch code ('controller' is a reference to the JMIntechControllers instance managing this element)
-            this.postOSCElementDetails(oscValue);
+            if (this.postMIDIOSC) { this.postOSCElementDetails(oscValue); }; // Calls method to post OSC element details to the post window
         }, "/%/%".format(if(this.deviceShortName == "PBF4") {this.deviceShortName ++ "_" ++ this.deviceNumb} {this.deviceShortName}, this.elementShortName).toLower ++ this.elementNumber;);
     }
 

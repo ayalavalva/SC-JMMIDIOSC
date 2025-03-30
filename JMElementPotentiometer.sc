@@ -2,8 +2,8 @@ JMElementPotentiometer : JMMIDIElements {
     var <>msbCC, <>lsbCC;
     var <>msbCCValue = 0, <>lsbCCValue = 0;
 
-    *new { |controller, deviceFullName, deviceShortName, deviceNumb, elementNumber, midiChannel, deviceOSCpath, msbCC, lsbCC|
-        ^super.new.init(controller, deviceFullName, deviceShortName, deviceNumb, "Potentiometer", "PO", elementNumber, midiChannel, deviceOSCpath).initPotentiometer(msbCC, lsbCC)
+    *new { |controller, deviceFullName, deviceShortName, deviceNumb, elementNumber, midiChannel, deviceOSCpath, postMIDIOSC, msbCC, lsbCC|
+        ^super.new.init(controller, deviceFullName, deviceShortName, deviceNumb, "Potentiometer", "PO", elementNumber, midiChannel, deviceOSCpath, postMIDIOSC).initPotentiometer(msbCC, lsbCC)
     }
 
     initPotentiometer { |msbCC, lsbCC|

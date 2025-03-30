@@ -6,9 +6,9 @@ JMIntechPBF4 : JMIntechControllers { // JMIntechPBF4: A subclass of JMIntechCont
     var <>elementGroupOrder; // Instance variable with the order and the element count for each the element groups of the device
 
     // Constructor: Creates a new instance of JMIntechPO16 with optional parameters for MIDI channel, starting CC number, OSC server address, and port.
-    *new { |midiChannel=0, startCC=64, deviceOSCpath="/pbf4", oscServAddr="127.0.0.1", oscServPort=9000|
+    *new { |midiChannel=0, startCC=64, deviceOSCpath="/pbf4", oscServAddr="127.0.0.1", oscServPort=9000, postMIDIOSC=false|
         this.classDeviceNumb = this.classDeviceNumb + 1; // Increment the classDeviceNumb to assign a unique number to this instance.
-        ^super.new.init("Intech Studio PBF4", "PBF4", midiChannel, oscServAddr, oscServPort).initPBF4(startCC, deviceOSCpath) // Call the superclass's init method to set up the device with its name, short name, MIDI channel, OSC server address, and port
+        ^super.new.init("Intech Studio PBF4", "PBF4", midiChannel, oscServAddr, oscServPort, postMIDIOSC).initPBF4(startCC, deviceOSCpath) // Call the superclass's init method to set up the device with its name, short name, MIDI channel, OSC server address, and port
     }
 
     // initPBF4: Initializes the PO16 device settings, specifically setting up the 4 potentiometers, 4 faders and 4 buttons

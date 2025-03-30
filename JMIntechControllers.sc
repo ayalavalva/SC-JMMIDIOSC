@@ -1,19 +1,20 @@
 JMIntechControllers {
-    var <>deviceFullName, <>deviceShortName, <>deviceNumb, <>midiChannel, <>oscServAddr, <>oscServPort; // Device identifiers
+    var <>deviceFullName, <>deviceShortName, <>deviceNumb, <>midiChannel, <>oscServAddr, <>oscServPort, <>postMIDIOSC; // Device identifiers
     var <>elementDict; // Dictionary to store element objects
     var <>busValueDict; // Dictionary to store bus values for some elements 
 
-    *new { |deviceFullName, deviceShortName, midiChannel, oscServAddr, oscServPort|
+    *new { |deviceFullName, deviceShortName, midiChannel, oscServAddr, oscServPort, postMIDIOSC|
         ^super.new.init(deviceFullName, deviceShortName, midiChannel, oscServAddr, oscServPort)
     }
 
-    init { |deviceFullName, deviceShortName, midiChannel, oscServAddr, oscServPort|
+    init { |deviceFullName, deviceShortName, midiChannel, oscServAddr, oscServPort, postMIDIOSC|
         this.deviceFullName = deviceFullName;
         this.deviceShortName = deviceShortName;
         this.deviceNumb = deviceNumb;
         this.midiChannel = midiChannel;
         this.oscServAddr = oscServAddr;
         this.oscServPort = oscServPort;
+        this.postMIDIOSC = postMIDIOSC; // Set the postMIDIOSC flag to determine whether to post MIDI and OSC messages
 
         // Initialize dictionaries based on the counts of different MIDI control elements.
         this.elementDict = IdentityDictionary.new; // Initialize element dictionary
@@ -56,10 +57,10 @@ JMIntechControllers {
 
                 // Creates an instance of the appropriate element class based on the group element type
                 var element = switch(elementType)
-                {'PO'} { JMElementPotentiometer.new(this, this.deviceFullName, this.deviceShortName, this.deviceNumb, elementNumber, this.midiChannel, this.deviceOSCpath, msbCC, lsbCC); }
-                {'EN'} { JMElementEncoder.new(this, this.deviceFullName, this.deviceShortName, this.deviceNumb, elementNumber, this.midiChannel, this.deviceOSCpath, cc); }
-                {'FA'} { JMElementFader.new(this, this.deviceFullName, this.deviceShortName, this.deviceNumb, elementNumber, this.midiChannel, this.deviceOSCpath, msbCC, lsbCC); }
-                {'BU'} { JMElementButton.new(this, this.deviceFullName, this.deviceShortName, this.deviceNumb, elementNumber, this.midiChannel, this.deviceOSCpath, cc); };
+                {'PO'} { JMElementPotentiometer.new(this, this.deviceFullName, this.deviceShortName, this.deviceNumb, elementNumber, this.midiChannel, this.deviceOSCpath, this.postMIDIOSC, msbCC, lsbCC); }
+                {'EN'} { JMElementEncoder.new(this, this.deviceFullName, this.deviceShortName, this.deviceNumb, elementNumber, this.midiChannel, this.deviceOSCpath, this.postMIDIOSC, cc); }
+                {'FA'} { JMElementFader.new(this, this.deviceFullName, this.deviceShortName, this.deviceNumb, elementNumber, this.midiChannel, this.deviceOSCpath, this.postMIDIOSC, msbCC, lsbCC); }
+                {'BU'} { JMElementButton.new(this, this.deviceFullName, this.deviceShortName, this.deviceNumb, elementNumber, this.midiChannel, this.deviceOSCpath, this.postMIDIOSC, cc); };
                 
                 var elementKey = (element.elementShortName ++ elementNumber).asSymbol; // Generate a unique key for the element based on its type and number (important for methods below)
 

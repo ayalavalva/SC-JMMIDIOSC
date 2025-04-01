@@ -3,8 +3,8 @@ JMElementEncoder : JMMIDIElements {
     var <>ccValue;
     var <>velocityFactor = 10;
 
-    *new { |controller, deviceFullName, deviceShortName, deviceNumb, elementNumber, midiChannel, deviceOSCpath, cc|
-        ^super.new.init(controller, deviceFullName, deviceShortName, deviceNumb, "Encoder", "EN", elementNumber, midiChannel, deviceOSCpath).initEncoder(cc)
+    *new { |controller, deviceFullName, deviceShortName, deviceNumb, elementNumber, midiChannel, deviceOSCpath, postMIDIOSC, cc|
+        ^super.new.init(controller, deviceFullName, deviceShortName, deviceNumb, "Encoder", "EN", elementNumber, midiChannel, deviceOSCpath, postMIDIOSC).initEncoder(cc)
     }
 
     initEncoder { |cc|

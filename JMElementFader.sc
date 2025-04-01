@@ -2,8 +2,8 @@ JMElementFader : JMMIDIElements {
     var <>msbCC, <>lsbCC;
     var <>msbCCValue = 0, <>lsbCCValue = 0;
 
-    *new { |controller, deviceFullName, deviceShortName, deviceNumb, elementNumber, midiChannel, deviceOSCpath, msbCC, lsbCC|
-        ^super.new.init(controller, deviceFullName, deviceShortName, deviceNumb, "Fader", "FA", elementNumber, midiChannel, deviceOSCpath).initFader(msbCC, lsbCC)
+    *new { |controller, deviceFullName, deviceShortName, deviceNumb, elementNumber, midiChannel, deviceOSCpath, postMIDIOSC, msbCC, lsbCC|
+        ^super.new.init(controller, deviceFullName, deviceShortName, deviceNumb, "Fader", "FA", elementNumber, midiChannel, deviceOSCpath, postMIDIOSC).initFader(msbCC, lsbCC)
     }
 
     initFader { |msbCC, lsbCC|

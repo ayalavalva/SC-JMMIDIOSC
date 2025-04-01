@@ -1,19 +1,20 @@
 JMIntechControllers {
-    var <>deviceFullName, <>deviceShortName, <>deviceNumb, <>midiChannel, <>oscServAddr, <>oscServPort; // Device identifiers
+    var <>deviceFullName, <>deviceShortName, <>deviceNumb, <>midiChannel, <>oscServAddr, <>oscServPort, <>postMIDIOSC; // Device identifiers
     var <>elementDict; // Dictionary to store element objects
     var <>busValueDict; // Dictionary to store bus values for some elements 
 
-    *new { |deviceFullName, deviceShortName, midiChannel, oscServAddr, oscServPort|
+    *new { |deviceFullName, deviceShortName, midiChannel, oscServAddr, oscServPort, postMIDIOSC|
         ^super.new.init(deviceFullName, deviceShortName, midiChannel, oscServAddr, oscServPort)
     }
 
-    init { |deviceFullName, deviceShortName, midiChannel, oscServAddr, oscServPort|
+    init { |deviceFullName, deviceShortName, midiChannel, oscServAddr, oscServPort, postMIDIOSC|
         this.deviceFullName = deviceFullName;
         this.deviceShortName = deviceShortName;
         this.deviceNumb = deviceNumb;
         this.midiChannel = midiChannel;
         this.oscServAddr = oscServAddr;
         this.oscServPort = oscServPort;
+        this.postMIDIOSC = postMIDIOSC; // Set the postMIDIOSC flag to determine whether to post MIDI and OSC messages
 
         // Initialize dictionaries based on the counts of different MIDI control elements.
         this.elementDict = IdentityDictionary.new; // Initialize element dictionary
@@ -21,34 +22,54 @@ JMIntechControllers {
     }
 
     //  Initializes MIDI elements (potentiometers, encoders, faders, buttons) by creating instances of their respective classes, updating the dictionaries, and printing initialization details to the console. It uses formatted strings to generate unique keys for each element and stores related information in the dictionaries.
+
+    /* TO BE DELETED AFTER TESTING
+    // OLDER VERSION OF THE initializeMIDIElements METHOD TO BE TESTED (loops to calculate nbElementsBefore and nbElementsAfter)
+    // Note: variable names in elementGroupCount.do changed in the next version for clarity have to be replaced if reverting to the old version
+
     initializeMIDIElements {
-        var nbElements = this.elementGroupOrder.collect { |elements| elements[1] }.sum; // Calculate the total number of elements of the device
+        var nbElements = this.elementGroupOrder.collect { |elements| elements[1] }.sum; // Calculate the total number of elements of the device (no matter the type)
 
-        this.elementGroupOrder.do { |elementKeyValueOuter|
-            var nbElementsBefore = 0, nbElementsAfter = 0;  // Initialize the number of elements before and after a group of elements
-            var elementType = elementKeyValueOuter[0];
-            var elementCount = elementKeyValueOuter[1];
-            var keyIndex = this.elementGroupOrder.detectIndex { |elementKeyValueInner| elementKeyValueInner[0] == elementType };
+        this.elementGroupOrder.do { |elementKeyValueOuter| // For each element group... (ex for PBF4: ['PO', 4], ['FA', 4] and ['BU', 4] in this order)
+            var nbElementsBefore = 0, nbElementsAfter = 0;  // Total number of elements before and after the element group (initialized to 0 for now)
+            var elementType = elementKeyValueOuter[0]; // Type of the element group (either 'PO', 'EN', 'FA' or 'BU')
+            var elementCount = elementKeyValueOuter[1]; // Number of elements of the element group
+            var keyIndex = this.elementGroupOrder.detectIndex { |elementKeyValueInner| elementKeyValueInner[0] == elementType }; // Index of the element group (based on element type)
 
-            if(keyIndex > 0) { this.elementGroupOrder[0..keyIndex - 1].do { |elementBefore| nbElementsBefore = nbElementsBefore + elementBefore[1];}; };
-            this.elementGroupOrder[(keyIndex + 1)..].do { |elementAfter| nbElementsAfter = nbElementsAfter + elementAfter[1];};
-    
-            elementCount.do { |i|
-                var elementNumber = i + 1;
-                var cc = this.startCC + nbElementsBefore + i;
-                var msbCC = this.startCC + nbElementsBefore + i;
-                var lsbCC = msbCC + nbElements;
+            if(keyIndex > 0) { this.elementGroupOrder[0..keyIndex - 1].do { |elementBefore| nbElementsBefore = nbElementsBefore + elementBefore[1];}; }; // Increment the number of elements before the element group (if any)
+            this.elementGroupOrder[(keyIndex + 1)..].do { |elementAfter| nbElementsAfter = nbElementsAfter + elementAfter[1];}; // Increment the number of elements after the element group (if any)
+    */
 
-                // Creates an instance of the appropriate element class based on the element type
-                var element = switch(elementType)
-                {'PO'} { JMElementPotentiometer.new(this, this.deviceFullName, this.deviceShortName, this.deviceNumb, elementNumber, this.midiChannel, this.deviceOSCpath, msbCC, lsbCC); }
-                {'EN'} { JMElementEncoder.new(this, this.deviceFullName, this.deviceShortName, this.deviceNumb, elementNumber, this.midiChannel, this.deviceOSCpath, cc); }
-                {'FA'} { JMElementFader.new(this, this.deviceFullName, this.deviceShortName, this.deviceNumb, elementNumber, this.midiChannel, this.deviceOSCpath, msbCC, lsbCC); }
-                {'BU'} { JMElementButton.new(this, this.deviceFullName, this.deviceShortName, this.deviceNumb, elementNumber, this.midiChannel, this.deviceOSCpath, cc); };
+    initializeMIDIElements {
+        var nbElements = this.elementGroupOrder.collect { |elementGroup| elementGroup[1] }.sum; // Calculate the total number of elements of the device (no matter the type)
+
+        this.elementGroupOrder.do { |elementGroup| // For each element group... (ex for PBF4: ['PO', 4], ['FA', 4] and ['BU', 4] in this order)
+            var elementGroupType = elementGroup[0]; // Type of the element group (either 'PO', 'EN', 'FA' or 'BU')
+            var elementGroupCount = elementGroup[1]; // Number of elements of the element group
+            var elementGroupKeyIndex = this.elementGroupOrder.detectIndex { |elementGroup| elementGroup[0] == elementGroupType }; // Index of the element group (based on element type)
+            var nbElementsBefore = if (elementGroupKeyIndex > 0) // Calculate the total number of elements before the element group (if any)
+                { this.elementGroupOrder[0..(elementGroupKeyIndex - 1)].collect { |elementGroup| elementGroup[1] }.sum }
+                { 0 };
+            var nbElementsAfter = if (elementGroupKeyIndex < (this.elementGroupOrder.size - 1)) // Calculate the total number of elements after the element group (if any)
+                { this.elementGroupOrder[(elementGroupKeyIndex + 1)..].collect { |elementGroup| elementGroup[1] }.sum } 
+                { 0 };
+
+            elementGroupCount.do { |i| // Iterate from 0 to the value of the element group count minus 1 (ex: 0 to 3 for PBF4 since its elementCount is 4 ... so equivalent to 4.do)
+                var elementNumber = i + 1; // Calculate the element number (starting from 1)
+                var cc = this.startCC + nbElementsBefore + i; // Calculate the MIDI CC number for the element
+                var msbCC = this.startCC + nbElementsBefore + i; // Calculate the MSB (Most Significant Byte) CC number for the element (same as MIDI cc above)
+                var lsbCC = msbCC + nbElements; // Calculate the LSB (Least Significant Byte) CC number for the element (MSB CC number + total number of elements) 
+
+                // Creates an instance of the appropriate element class based on the group element type
+                var element = switch(elementGroupType)
+                {'PO'} { JMElementPotentiometer.new(this, this.deviceFullName, this.deviceShortName, this.deviceNumb, elementNumber, this.midiChannel, this.deviceOSCpath, this.postMIDIOSC, msbCC, lsbCC); }
+                {'EN'} { JMElementEncoder.new(this, this.deviceFullName, this.deviceShortName, this.deviceNumb, elementNumber, this.midiChannel, this.deviceOSCpath, this.postMIDIOSC, cc); }
+                {'FA'} { JMElementFader.new(this, this.deviceFullName, this.deviceShortName, this.deviceNumb, elementNumber, this.midiChannel, this.deviceOSCpath, this.postMIDIOSC, msbCC, lsbCC); }
+                {'BU'} { JMElementButton.new(this, this.deviceFullName, this.deviceShortName, this.deviceNumb, elementNumber, this.midiChannel, this.deviceOSCpath, this.postMIDIOSC, cc); };
                 
-                var elementKey = (element.elementShortName ++ elementNumber).asSymbol;
+                var elementKey = (element.elementShortName ++ elementNumber).asSymbol; // Generate a unique key for the element based on its type and number (important for methods below)
 
-                // Prints initialization details to the console
+                // Prints initialization details to the console (using method in JMMIDIElenent abstract class)
                 switch(element.elementShortName.asSymbol)
                 {'PO'} { element.postMIDIElementDetails; }
                 {'EN'} { element.postMIDIElementDetails; }
@@ -56,7 +77,7 @@ JMIntechControllers {
                 {'BU'} { element.postMIDIElementDetails; };
                 
                 // Initializes element instance dictionary
-                this.elementDict.put(elementKey, element);
+                this.elementDict.put(elementKey, element); // Store the element key and element instance in the element dictionary (ex: 'PO1' -> JMElementPotentiometer instance)
             };
         };
     }

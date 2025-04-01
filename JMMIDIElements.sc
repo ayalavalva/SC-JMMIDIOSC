@@ -1,19 +1,20 @@
 JMMIDIElements {
     var <>controller, <>deviceFullName, <>deviceShortName, <>deviceNumb, <>elementFullName, <>elementShortName, <>elementNumber, <>midiChannel, <>deviceOSCpath;
     var <>controlBus;
-    var <>lowValue = 0, <>highValue = 1;
+    var <>lowValue = 0, <>highValue = 1; // Could be renamed to minControlBusValue and maxControlBusValue for more clarity
     var <>initValue = nil, <>initTriggered = false;
     var <>busValue = 0;
     var <>oscSendEnabled = true; // I honestly don't see the point of keeping this flag (and the method in JMIntechControllers). All elements should always send their busValue to both the widget and the label2
     var <>elementOSCpath;
     var <>label1OSCpath;
     var <>label2OSCpath;
+    var <>postMIDIOSC; // Flag to control whether to post MIDI and OSC messages to the post window
 
-    *new { |controller, deviceFullName, deviceShortName, deviceNumb, elementFullName, elementShortName, elementNumber, midiChannel, deviceOSCpath|
-        ^super.new(controller, deviceFullName, deviceShortName, deviceNumb, elementFullName, elementShortName, elementNumber, midiChannel, deviceOSCpath)
+    *new { |controller, deviceFullName, deviceShortName, deviceNumb, elementFullName, elementShortName, elementNumber, midiChannel, deviceOSCpath, postMIDIOSC|
+        ^super.new(controller, deviceFullName, deviceShortName, deviceNumb, elementFullName, elementShortName, elementNumber, midiChannel, deviceOSCpath, postMIDIOSC)
     }
 
-    init { |controller, deviceFullName, deviceShortName, deviceNumb, elementFullName, elementShortName, elementNumber, midiChannel, deviceOSCpath|
+    init { |controller, deviceFullName, deviceShortName, deviceNumb, elementFullName, elementShortName, elementNumber, midiChannel, deviceOSCpath, postMIDIOSC|
         this.controller = controller;
         this.deviceFullName = deviceFullName;
         this.deviceShortName = deviceShortName;
@@ -24,6 +25,7 @@ JMMIDIElements {
         this.midiChannel = midiChannel;
         this.deviceOSCpath = deviceOSCpath;
         this.controlBus = Bus.control(Server.default, 1);
+        this.postMIDIOSC = postMIDIOSC; // Set the flag to control whether to post MIDI and OSC messages to the post window
     }
 
     midi7bitReceiver {
@@ -48,14 +50,14 @@ JMMIDIElements {
     midiValuetoControlBus {
         this.midiValueToControlBusValue; // calls superclass or subclass overriding methods to convert MIDI value to control bus value
         this.controlBus.set(this.busValue); // sets the control bus to busValue
-        this.postMIDIElementDetails; // calls method to post element details to the post window
+        if (this.postMIDIOSC) { this.postMIDIElementDetails; }; // calls method to post element details to the post window
         this.triggerCallback(this.busValue); // Calls a method that triggers the callback for the element to get the value in patch code ('controller' is a reference to the JMIntechControllers instance managing this element)
         if (this.oscSendEnabled) { this.sendBusValuetoOSCElement; this.sendBusValuetoOSClabel2 }; // Sends the bus value to the OSC element and label2
     }
 
     // Handles the conversion of MIDI values to control bus values for 14-bit MIDI elements
     midiValueToControlBusValue {
-        var midiValue = ((this.msbCCValue << 7) + this.lsbCCValue).linlin(0, 16383, this.lowValue, this.highValue);
+        var midiValue = ((this.msbCCValue << 7) + this.lsbCCValue).linlin(0, 16383, this.lowValue, this.highValue); // Bitwise left shift by 7 positions of the MSB value (same as * 128) and add the LSB value to get the 14-bit MIDI value, then linearly map it to the control bus range
             
             if (this.initValue.isNil) 
             {this.busValue = midiValue;} // If initValue is not set, use midiValue directly
@@ -97,7 +99,7 @@ JMMIDIElements {
             var oscValue = if(this.elementShortName == "BU") {msg[1].asInteger} {msg[1].asFloat}; // forces the value to be an integer for buttons
             this.controlBus.set(oscValue);
             this.triggerCallback(oscValue); // Calls a method that triggers the callback for the element to get the value in patch code ('controller' is a reference to the JMIntechControllers instance managing this element)
-            this.postOSCElementDetails(oscValue);
+            if (this.postMIDIOSC) { this.postOSCElementDetails(oscValue); }; // Calls method to post OSC element details to the post window
         }, "/%/%".format(if(this.deviceShortName == "PBF4") {this.deviceShortName ++ "_" ++ this.deviceNumb} {this.deviceShortName}, this.elementShortName).toLower ++ this.elementNumber;);
     }
 

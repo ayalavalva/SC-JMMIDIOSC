@@ -2,8 +2,8 @@ JMElementButton : JMMIDIElements {
     var <>cc;
     var <>ccValue;
 
-    *new { |controller, deviceFullName, deviceShortName, deviceNumb, elementNumber, midiChannel, deviceOSCpath, cc|
-        ^super.new.init(controller, deviceFullName, deviceShortName, deviceNumb, "Button", "BU", elementNumber, midiChannel, deviceOSCpath).initButton(cc)
+    *new { |controller, deviceFullName, deviceShortName, deviceNumb, elementNumber, midiChannel, deviceOSCpath, postMIDIOSC, cc|
+        ^super.new.init(controller, deviceFullName, deviceShortName, deviceNumb, "Button", "BU", elementNumber, midiChannel, deviceOSCpath, postMIDIOSC).initButton(cc)
     }
 
     initButton { |cc|

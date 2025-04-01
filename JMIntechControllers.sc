@@ -23,9 +23,9 @@ JMIntechControllers {
 
     //  Initializes MIDI elements (potentiometers, encoders, faders, buttons) by creating instances of their respective classes, updating the dictionaries, and printing initialization details to the console. It uses formatted strings to generate unique keys for each element and stores related information in the dictionaries.
 
-    /*
+    /* TO BE DELETED AFTER TESTING
     // OLDER VERSION OF THE initializeMIDIElements METHOD TO BE TESTED (loops to calculate nbElementsBefore and nbElementsAfter)
-    // Note: variable names in elementGroupCount.do have been changed in the nex version for clarity and have to be replaced if reverting to the old version
+    // Note: variable names in elementGroupCount.do changed in the next version for clarity have to be replaced if reverting to the old version
 
     initializeMIDIElements {
         var nbElements = this.elementGroupOrder.collect { |elements| elements[1] }.sum; // Calculate the total number of elements of the device (no matter the type)

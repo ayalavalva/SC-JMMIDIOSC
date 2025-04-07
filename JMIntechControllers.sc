@@ -93,9 +93,9 @@ JMIntechControllers {
 
     // Method that looks up and executes the callback function associated with a given element key, passing the provided value to the function.
     triggerCallback { |elementKey, busValue|
-        var midiValue = this.busValueDict.at(elementKey);
-        if (midiValue.notNil) {
-            midiValue.value(busValue);
+        var callbackFunc = this.busValueDict.at(elementKey);
+        if (callbackFunc.notNil) {
+            callbackFunc.value(busValue);
         }
     }   
     

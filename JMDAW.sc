@@ -20,7 +20,7 @@ JMDAW {
         this.defineSend2x2;
         // this.sendAmplitudeToOsCvisualizer;
         Server.local.sync; // Ensure SynthDefs are compiled before proceeding
-        this.createTracks;
+        this.createAudioBusses;
     }
 
     defineMixer2x2 {
@@ -43,47 +43,52 @@ JMDAW {
         }).add;
     }
 
-    createTracks {
+    createAudioBusses {
+        var trackAudioBusses = Array.fill(this.numTracks, { Bus.audio(Server.local, 2) });
+        var sendAudioBusses = Array.fill(this.numSends, { Bus.audio(Server.local, 2) });
+        this.createTracks(trackAudioBusses, sendAudioBusses);
+        this.createSends(sendAudioBusses);
+        this.createMaster;
+    }
+
+    createTracks { |trackAudioBusses, sendAudioBusses|
         // var lastGroup;
         numTracks.do { |i|
             var channelKey = ('track' ++ (i + 1)).asSymbol;
             var name = "Track" + (i + 1);
             var number = i + 1;
-            var audioBus = Bus.audio(Server.local, 2);
+            var trackAudioBus = trackAudioBusses[i];
+            var sendAudioBus = sendAudioBusses[i];
             // var group = if(i == 0, { Group.new }, { Group.after(lastGroup) });
             var group = Group.tail;
             var synthGroup = Group.head(group);
             var fxGroup = Group.after(synthGroup);
             var faderControlBus = this.faderControlBusses[this.numMaster + i];
             var sendControlBus = this.sendControlBusses[this.numMaster + i];
-            var mixer2x2 = Synth(\mixer2x2, [in: audioBus, out: 0, pan: 0, controlBus: faderControlBus], target: group, addAction: \addToTail);
-            var send2x2 = Synth(\send2x2, [in: audioBus, out: audioBus, controlBus: sendControlBus], target: mixer2x2, addAction: \addAfter); // PROBLEM !!!!! the out paramter needs to be the audioBus of the createSends!!!!
-            var channel = JMDAWTrack.new(name: name, number: number, audioBus: audioBus, group: group, synthGroup: synthGroup, fxGroup: fxGroup, mixer2x2: mixer2x2, send2x2: send2x2, faderControlBus: faderControlBus, sendControlBus: sendControlBus);
+            var mixer2x2 = Synth(\mixer2x2, [in: trackAudioBus, out: 0, pan: 0, controlBus: faderControlBus], target: group, addAction: \addToTail);
+            var send2x2 = Synth(\send2x2, [in: trackAudioBus, out: sendAudioBus, controlBus: sendControlBus], target: mixer2x2, addAction: \addAfter);
+            var channel = JMDAWTrack.new(name: name, number: number, audioBus: trackAudioBus, group: group, synthGroup: synthGroup, fxGroup: fxGroup, mixer2x2: mixer2x2, send2x2: send2x2, faderControlBus: faderControlBus, sendControlBus: sendControlBus);
             
             this.channels.put(channelKey, channel);
             
             // lastGroup = group; // Update lastGroup to the current group for the next iteration
         };
-        
-        this.createSends;
     }
 
-    createSends {
+    createSends { |sendAudioBusses|
         numSends.do { |i|
             var channelKey = ('send' ++ (i + 1)).asSymbol;
             var name = "Send" + (i + 1);
             var number = i + 1;
-            var audioBus = Bus.audio(Server.local, 2);
+            var sendAudioBus = sendAudioBusses[i];
             var group = Group.tail;
             var fxGroup = Group.head(group);
             var faderControlBus = this.faderControlBusses[this.faderControlBusses.size - this.numSends + i];
-            var mixer2x2 = Synth(\mixer2x2, [in: audioBus, out: 0, pan: 0, controlBus: faderControlBus], target: group, addAction: \addToTail);
-            var channel = JMDAWSend.new(name: name, number: number, audioBus: audioBus, group: group, fxGroup: fxGroup, mixer2x2: mixer2x2, faderControlBus: faderControlBus);
+            var mixer2x2 = Synth(\mixer2x2, [in: sendAudioBus, out: 0, pan: 0, controlBus: faderControlBus], target: group, addAction: \addToTail);
+            var channel = JMDAWSend.new(name: name, number: number, audioBus: sendAudioBus, group: group, fxGroup: fxGroup, mixer2x2: mixer2x2, faderControlBus: faderControlBus);
             
             this.channels.put(channelKey, channel)
         };
-
-        this.createMaster;
     }
 
     createMaster {

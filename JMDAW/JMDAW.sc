@@ -2,18 +2,28 @@ JMDAW {
     var <>numMaster = 1, <>numTracks, <>numSends;
     var <>faderControlBusses, <>sendControlBusses;
     var <>channels;
+    var <>po16, <>en16, <>pbf41, <>pbf42;
+    var <>postMIDIOSC = false;
 
-    *new { |numTracks = 6, numSends = 1, controllers|
+    *new { |numTracks = 6, numSends = 1, postMIDIOSC|
         if (numTracks + numSends > 7) 
         { "Too many channels and sends. Maximum is 7.".error; }
-        { ^super.new.init(numTracks, numSends); }
+        { ^super.new.init(numTracks, numSends, postMIDIOSC); }
     }
 
-    init { |numTracks, numSends|
+    init { |numTracks, numSends, postMIDIOSC|
         this.numTracks = numTracks;
         this.numSends = numSends;
-        this.faderControlBusses = [~pbf41.cb(\FA1), ~pbf41.cb(\FA2), ~pbf41.cb(\FA3), ~pbf41.cb(\FA4), ~pbf42.cb(\FA1), ~pbf42.cb(\FA2), ~pbf42.cb(\FA3), ~pbf42.cb(\FA4)];
-        this.sendControlBusses = [~pbf41.cb(\PO1), ~pbf41.cb(\PO2), ~pbf41.cb(\PO3), ~pbf41.cb(\PO4), ~pbf42.cb(\PO1), ~pbf42.cb(\PO2), ~pbf42.cb(\PO3), ~pbf42.cb(\PO4)];
+
+        this.po16 = JMIntechPO16(midiChannel: 0, startCC: 0, oscServAddr: "127.0.0.1", oscServPort: 9000, postMIDIOSC: this.postMIDIOSC);
+	    this.en16 = JMIntechEN16(midiChannel: 0, startCC: 32, oscServAddr: "127.0.0.1", oscServPort: 9000, postMIDIOSC: this.postMIDIOSC);
+	    this.pbf41 = JMIntechPBF4(midiChannel: 0, startCC: 64, oscServAddr: "127.0.0.1", oscServPort: 9000, postMIDIOSC: this.postMIDIOSC);
+	    this.pbf42 = JMIntechPBF4(midiChannel: 0, startCC: 88, oscServAddr: "127.0.0.1", oscServPort: 9000, postMIDIOSC: this.postMIDIOSC);
+
+        this.faderControlBusses = [this.pbf41.cb(\FA1), this.pbf41.cb(\FA2), this.pbf41.cb(\FA3), this.pbf41.cb(\FA4), this.pbf42.cb(\FA1), this.pbf42.cb(\FA2), this.pbf42.cb(\FA3), this.pbf42.cb(\FA4)];
+        this.sendControlBusses = [this.pbf41.cb(\PO1), this.pbf41.cb(\PO2),this.pbf41.cb(\PO3), this.pbf41.cb(\PO4), 
+        this.pbf42.cb(\PO1), this.pbf42.cb(\PO2), this.pbf42.cb(\PO3),this.pbf42.cb(\PO4)];
+        
         this.channels = IdentityDictionary.new(n: numMaster + numTracks + numSends);
 
         this.defineMixer2x2;

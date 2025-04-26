@@ -41,6 +41,23 @@ JMElementEncoder : JMMIDIElements {
         { this.busValue = incrementMidiValue.value(this.ccValue); }
     }
 
+    // Sets the low, high, initial and velocity factor value of the element, sets the element control bus and sends OSC message with that initial value.
+    setEncoderValues { |lowValue, initValue, highValue, velocityFactor = 10|
+        this.lowValue = lowValue;
+        this.initValue = initValue;
+        this.highValue = highValue;
+        this.velocityFactor = velocityFactor;
+        this.prSendInitValuetoOSC;
+    }
+
+    // Methods called by JMIntechControllers setElementValue method to send initial trigger value to OSC element and label
+    prSendInitValuetoOSC {
+        if (this.initValue.notNil) {
+            JMOSCManager.getSharedInstance.send(this.deviceOSCpath ++ this.elementOSCpath, this.initValue); 
+            JMOSCManager.getSharedInstance.send(this.deviceOSCpath ++ this.label2OSCpath, (this.initValue).asInteger);// Send the value to OSC label};
+        };
+    }
+
     sendBusValuetoOSClabel2 {
         if(this.lowValue.notNil and: { this.highValue.notNil }) {
             // If both are non-nil, apply clipping to ensure the value stays within the specified range

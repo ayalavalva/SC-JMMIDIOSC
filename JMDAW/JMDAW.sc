@@ -20,9 +20,8 @@ JMDAW {
 	    this.pbf41 = JMIntechPBF4(midiChannel: 0, startCC: 64, oscServAddr: "127.0.0.1", oscServPort: 9000, postMIDIOSC: this.postMIDIOSC);
 	    this.pbf42 = JMIntechPBF4(midiChannel: 0, startCC: 88, oscServAddr: "127.0.0.1", oscServPort: 9000, postMIDIOSC: this.postMIDIOSC);
 
-        this.faderControlBusses = [this.pbf41.cb(\FA1), this.pbf41.cb(\FA2), this.pbf41.cb(\FA3), this.pbf41.cb(\FA4), this.pbf42.cb(\FA1), this.pbf42.cb(\FA2), this.pbf42.cb(\FA3), this.pbf42.cb(\FA4)];
-        this.sendControlBusses = [this.pbf41.cb(\PO1), this.pbf41.cb(\PO2),this.pbf41.cb(\PO3), this.pbf41.cb(\PO4), 
-        this.pbf42.cb(\PO1), this.pbf42.cb(\PO2), this.pbf42.cb(\PO3),this.pbf42.cb(\PO4)];
+        this.faderControlBusses = [this.pbf41.fa1.cb, this.pbf41.fa2.cb, this.pbf41.fa3.cb, this.pbf41.fa4.cb, this.pbf42.fa1.cb, this.pbf42.fa2.cb, this.pbf42.fa3.cb, this.pbf42.fa4.cb];
+        this.sendControlBusses = [this.pbf41.po1.cb, this.pbf41.po2.cb, this.pbf41.po3.cb, this.pbf41.po4.cb, this.pbf42.po1.cb, this.pbf42.po2.cb, this.pbf42.po3.cb, this.pbf42.po4.cb];
         
         this.channels = IdentityDictionary.new(n: numMaster + numTracks + numSends);
 

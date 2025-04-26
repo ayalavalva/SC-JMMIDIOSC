@@ -1,22 +1,47 @@
-JMIntechEN16 : JMIntechControllers { // JMIntechEN16: A subclass of JMIntechControllers designed specifically for the "Intech Studio EN16" MIDI controller, which features 16 encoders and 16 buttons
-    classvar <>classDeviceNumb = 0; // A class variable to keep track of the number of EN16 device instances
-    var <>startCC; // Instance variables for the starting MIDI CC (Control Change) number 
-    var <>deviceNumb; // Instance variables for the unique device number assigned to each instance
-    var <>deviceOSCpath; // Instance variables for the OSC path for the device
-    var <>elementGroupOrder; // Instance variable with the order and the element count for each the element groups of the device
+// JMIntechEN16: A subclass of JMIntechControllers designed specifically for the "Intech Studio EN16" MIDI controller, which features 16 encoders and 16 buttons
 
-    // Constructor: Creates a new instance of JMIntechPO16 with optional parameters for MIDI channel, starting CC number, OSC server address, and port.
+JMIntechEN16 : JMIntechControllers {
+    classvar <>classDeviceNumb = 0; // Class variable to keep track of the number of EN16 device instances
+    var <>startCC; // Starting MIDI CC (Control Change) number 
+    var <>deviceNumb; // Unique device number assigned to each instance
+    
+    // Encoder instances
+    var <>en1, <>en2, <>en3, <>en4;
+    var <>en5, <>en6, <>en7, <>en8; 
+    var <>en9, <>en10, <>en11, <>en12; 
+    var <>en13, <>en14, <>en15, <>en16;
+    // / Button instances
+    var <>bu1, <>bu2, <>bu3, <>bu4;
+    var <>bu5, <>bu6, <>bu7, <>bu8; 
+    var <>bu9, <>bu10, <>bu11, <>bu12; 
+    var <>bu13, <>bu14, <>bu15, <>bu16;
+
+    var <>deviceOSCpath; // OSC path for the device
+
     *new { |midiChannel=0, startCC=32, deviceOSCpath="/en16", oscServAddr="127.0.0.1", oscServPort=9000, postMIDIOSC=false|
         this.classDeviceNumb = this.classDeviceNumb + 1; // Increment the classDeviceNumb to assign a unique number to this instance.
-        ^super.new.init("Intech Studio EN16", "EN16", midiChannel, oscServAddr, oscServPort, postMIDIOSC).initEN16(startCC, deviceOSCpath) // Call the superclass's init method to set up the device with its name, short name, MIDI channel, OSC server address, and port
+        
+        ^super.new.init("Intech Studio EN16", "EN16", midiChannel, oscServAddr, oscServPort, postMIDIOSC).initEN16(startCC, deviceOSCpath)
     }
 
-    // initEN16: Initializes the PO16 device settings, specifically setting up the 16 encoders and 16 buttons
     initEN16 { |startCC, deviceOSCpath|
         this.deviceNumb = classDeviceNumb; // Assign the unique device number from classDeviceNumb
-        this.startCC = startCC; // Set the starting MIDI CC number for the potentiometers
-        this.deviceOSCpath = deviceOSCpath; // Set the OSC path for the device
-        this.elementGroupOrder = [['EN', 16], ['BU', 16]]; // Set the element groups [type, count] and their order for the device
-        super.initializeMIDIElements; // Call the superclass's initializeMIDIElements method to set up the MIDI elements (encoders and buttons) for this device
+        this.startCC = startCC;
+        this.deviceOSCpath = deviceOSCpath;
+
+        // Assign 16 encoders instances in a loop
+        (1..16).do { |i|
+            var msb = this.startCC + (i - 1);
+            var lsb = this.startCC + 16 + (i - 1);
+            var en = JMElementEncoder.new(this, this.deviceFullName, this.deviceShortName, this.deviceNumb, i, this.midiChannel, this.deviceOSCpath, this.postMIDIOSC, msb, lsb);
+            this.perform(("en" ++ i.asString ++ "_").asSymbol, en;);
+        };
+
+        // Assign 16 button instances in a loop
+        (1..16).do { |i|
+            var cc = this.startCC + 32 + (i - 1);
+            var bu = JMElementButton.new(this, this.deviceFullName, this.deviceShortName, this.deviceNumb, i, this.midiChannel, this.deviceOSCpath, this.postMIDIOSC, cc);
+            this.perform(("bu" ++ i.asString ++ "_").asSymbol, bu;);
+        };
     }
 }

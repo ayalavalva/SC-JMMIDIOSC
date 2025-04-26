@@ -9,6 +9,7 @@ JMMIDIElements {
     var <>label1OSCpath;
     var <>label2OSCpath;
     var <>postMIDIOSC; // Flag to control whether to post MIDI and OSC messages to the post window
+    var <>callbackFunc;
 
     *new { |controller, deviceFullName, deviceShortName, deviceNumb, elementFullName, elementShortName, elementNumber, midiChannel, deviceOSCpath, postMIDIOSC|
         ^super.new(controller, deviceFullName, deviceShortName, deviceNumb, elementFullName, elementShortName, elementNumber, midiChannel, deviceOSCpath, postMIDIOSC)
@@ -115,14 +116,38 @@ JMMIDIElements {
     }
 
     // Methods called by JMIntechControllers setElementValue method to send initial trigger value to OSC element and label
-    sendInitValuetoOSC {
+    prSendInitValuetoOSC {
         if (this.initValue.notNil) {
             JMOSCManager.getSharedInstance.send(this.deviceOSCpath ++ this.elementOSCpath, this.initValue); 
             JMOSCManager.getSharedInstance.send(this.deviceOSCpath ++ this.label2OSCpath, (this.initValue * 100).asInteger);// Send the value to OSC label};
         };
     }
 
+    observeBusValue { |func|
+        this.callbackFunc = func;
+    }
+
     triggerCallback { |busValue|
-        this.controller.triggerCallback((this.elementShortName ++ this.elementNumber).asSymbol, busValue); // Trigger the callback for the element to get the value in patch code ('controller' is a reference to the JMIntechControllers instance managing this element)
+        // this.controller.triggerCallback((this.elementShortName ++ this.elementNumber).asSymbol, busValue); // Trigger the callback for the element to get the value in patch code ('controller' is a reference to the JMIntechControllers instance managing this element)
+        if (callbackFunc.notNil) { this.callbackFunc.value(busValue) };
+    }
+
+    // Sets initial value of the element, sets the element control bus and sends OSC message with that initial value.
+    setElementValue { |initValue|
+        this.initValue = initValue;
+        this.setBusValueToInitValue;
+        this.prSendInitValuetoOSC;
+    }
+
+    cb {
+        ^this.controlBus;
+    }
+
+    inCB {
+        ^In.kr(this.controlBus, 1);
+    }
+
+    lagInCB { |lag = 0.3|
+        ^Lag.kr(this.inCB, lag); 
     }
 }

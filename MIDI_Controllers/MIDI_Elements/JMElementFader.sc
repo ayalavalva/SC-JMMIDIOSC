@@ -1,4 +1,4 @@
-JMElementFader : JMMIDIElements {
+JMElementFader : JMMIDIElement {
     var <>msbCC, <>lsbCC;
     var <>msbCCValue = 0, <>lsbCCValue = 0;
 
@@ -13,7 +13,9 @@ JMElementFader : JMMIDIElements {
         this.label1OSCpath = this.elementOSCpath ++ "_lb1";
         this.label2OSCpath = this.elementOSCpath ++ "_lb2";
 
-        super.midi14bitReceivers;
+        this.midiReceiver = JMMIDI14bitReceiver(this);
+        this.updateMidiValue;
+        
         super.receiveOSCValuetoControlBus; // also receive values from OSC, updates the control bus and allows to get the OSC value in patch code
     }
 

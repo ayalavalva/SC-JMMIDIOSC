@@ -1,6 +1,6 @@
-// JMIntechEN16: A subclass of JMIntechControllers designed specifically for the "Intech Studio EN16" MIDI controller, which features 16 encoders and 16 buttons
+// JMIntechEN16: A subclass of JMIntechController designed specifically for the "Intech Studio EN16" MIDI controller, which features 16 encoders and 16 buttons
 
-JMIntechEN16 : JMIntechControllers {
+JMIntechEN16 : JMIntechController {
     classvar <>classDeviceNumb = 0; // Class variable to keep track of the number of EN16 device instances
     var <>startCC; // Starting MIDI CC (Control Change) number 
     var <>deviceNumb; // Unique device number assigned to each instance
@@ -31,15 +31,14 @@ JMIntechEN16 : JMIntechControllers {
 
         // Assign 16 encoders instances in a loop
         (1..16).do { |i|
-            var msb = this.startCC + (i - 1);
-            var lsb = this.startCC + 16 + (i - 1);
-            var en = JMElementEncoder.new(this, this.deviceFullName, this.deviceShortName, this.deviceNumb, i, this.midiChannel, this.deviceOSCpath, this.postMIDIOSC, msb, lsb);
+            var cc = this.startCC + (i - 1);
+            var en = JMElementEncoder.new(this, this.deviceFullName, this.deviceShortName, this.deviceNumb, i, this.midiChannel, this.deviceOSCpath, this.postMIDIOSC, cc);
             this.perform(("en" ++ i.asString ++ "_").asSymbol, en;);
         };
 
         // Assign 16 button instances in a loop
         (1..16).do { |i|
-            var cc = this.startCC + 32 + (i - 1);
+            var cc = this.startCC + 16 + (i - 1);
             var bu = JMElementButton.new(this, this.deviceFullName, this.deviceShortName, this.deviceNumb, i, this.midiChannel, this.deviceOSCpath, this.postMIDIOSC, cc);
             this.perform(("bu" ++ i.asString ++ "_").asSymbol, bu;);
         };

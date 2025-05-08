@@ -1,6 +1,6 @@
-// JMIntechPO16: A subclass of JMIntechControllers designed for the "Intech Studio PO16" MIDI controller, which features 16 potentiometers
+// JMIntechPO16: A subclass of JMIntechController designed for the "Intech Studio PO16" MIDI controller, which features 16 potentiometers
 
-JMIntechPO16 : JMIntechControllers {
+JMIntechPO16 : JMIntechController {
     classvar <>classDeviceNumb = 0; // Class variable to keep track of the number of PO16 device instances;
     var <>startCC; // Starting MIDI CC (Control Change) number
     var <>deviceNumb; // Unique device number assigned to each instance

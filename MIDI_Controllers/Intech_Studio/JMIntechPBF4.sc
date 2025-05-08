@@ -1,6 +1,6 @@
-// JMIntechPBF4: A subclass of JMIntechControllers designed specifically for the "Intech Studio PBF4" MIDI controller, which features 4 potentiometers, 4 faders and 4 buttons
+// JMIntechPBF4: A subclass of JMIntechController designed specifically for the "Intech Studio PBF4" MIDI controller, which features 4 potentiometers, 4 faders and 4 buttons
 
-JMIntechPBF4 : JMIntechControllers {
+JMIntechPBF4 : JMIntechController {
     classvar <>classDeviceNumb = 0; // // Class variable to keep track of the number of PBF4 device instances
     var <>startCC; // Starting MIDI CC (Control Change) number 
     var <>deviceNumb; // Unique device number assigned to each instance

@@ -1,4 +1,4 @@
-JMIntechControllers {
+JMIntechController {
     var <>deviceFullName, <>deviceShortName, <>deviceNumb, <>midiChannel, <>oscServAddr, <>oscServPort, <>postMIDIOSC; // Device identifiers
     var <>elementDict; // Dictionary to store element objects
     var <>busValueDict; // Dictionary to store bus values for some elements 

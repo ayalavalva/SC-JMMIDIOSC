@@ -1,18 +1,18 @@
-JMDAWMaster : JMDAW {
+JMDAWMasterTrack {
     var <>name;
-    var <>fxGroup;
+    var <>group;
     var <>mixer2x2;
     var <>faderControlBus;
 
-    *new { |name, fxGroup, mixer2x2, faderControlBus|
-        ^super.new.init(name, fxGroup, mixer2x2, faderControlBus)
+    *new { |faderControlBus|
+        ^super.new.init(faderControlBus)
     }
 
-    init { |name, fxGroup, mixer2x2, faderControlBus|
-        this.name = name;
-        this.fxGroup = fxGroup;
-        this.mixer2x2 = mixer2x2;
+    init { |faderControlBus|
+        this.name = "Master";
+        this.group = Group.tail;
         this.faderControlBus = faderControlBus;
+        this.mixer2x2 = Synth(\mixer2x2, [in: 0, out: 0, controlBus: faderControlBus], addAction: \addToTail);
     }
 
     sendAmplitudeToOsCvisualizer {

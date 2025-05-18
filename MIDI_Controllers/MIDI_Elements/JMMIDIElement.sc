@@ -37,7 +37,7 @@ JMMIDIElement {
     }
 
     prProcessMidi {
-        this.controlBus.prSetCtrlBusValue(this.elementShortName, this.midiValue); // Normalize the MIDI value to the control bus range
+        this.controlBus.setCtrlBusValue(this.elementShortName, this.midiValue); // Normalize the MIDI value to the control bus range
 
         this.prTriggerCallback(this.controlBus.ctrlBusValue);
 
@@ -63,8 +63,8 @@ JMMIDIElement {
     receiveOSCValuetoControlBus {
         OSCdef(("%%".format(if(this.deviceShortName == "PBF4") {this.deviceShortName.toLower ++ "_" ++ this.deviceNumb} {this.deviceShortName.toLower}, this.elementShortName.toLower) ++ this.elementNumber).asSymbol, { |msg|
             var oscValue = if(this.elementShortName == "BU") {msg[1].asInteger} {msg[1].asFloat}; // forces the value to be an integer for buttons
-            this.controlBus.ctrlBusValue.set(oscValue);
-            this.triggerCallback(oscValue); // Calls a method that triggers the callback for the element to get the value in patch code ('controller' is a reference to the JMIntechControllers instance managing this element)
+            this.controlBus.controlBus.set(oscValue);
+            this.prTriggerCallback(oscValue); // Calls a method that triggers the callback for the element to get the value in patch code ('controller' is a reference to the JMIntechControllers instance managing this element)
             if (this.postMIDIOSC) { this.prPostOSCElementDetails(oscValue); }; // Calls method to post OSC element details to the post window
         }, "/%/%".format(if(this.deviceShortName == "PBF4") {this.deviceShortName ++ "_" ++ this.deviceNumb} {this.deviceShortName}, this.elementShortName).toLower ++ this.elementNumber;);
     }

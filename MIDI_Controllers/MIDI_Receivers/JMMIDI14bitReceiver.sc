@@ -26,6 +26,7 @@ receiveMidiValue {
         this.midiCallback.value(midiValue);  // notify listener
     }
 
+    // called by JMMIDIElement to post MIDI element details if postMIDIOSC is true
     postMIDIElementDetails {
         var commonDetails = (this.element.deviceFullName ++ (if (this.element.deviceShortName == "PBF4") {" (" ++ this.element.deviceNumb ++ ")"} {""}) + this.element.elementFullName + this.element.elementNumber + "MIDI Channel" + this.element.midiChannel);
         (commonDetails + "msbCC" + this.element.msbCC + "lsbCC" + this.element.lsbCC ++ ":" + this.element.controlBus.ctrlBusValue).postln;

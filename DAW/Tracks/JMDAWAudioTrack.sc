@@ -15,11 +15,11 @@ JMDAWAudioTrack {
         this.trackAudioBus = trackAudioBus;
         this.sendAudioBus = sendAudioBus;
         this.group = Group.tail;
-        this.synthGroup = Group.head(group);
-        this.fxGroup = Group.after(synthGroup);
+        this.synthGroup = Group.head(this.group);
+        this.fxGroup = Group.after(this.synthGroup);
         this.faderControlBus = faderControlBus;
         this.sendControlBus = sendControlBus;
-        this.mixer2x2 = Synth(\mixer2x2, [in: trackAudioBus, out: 0, pan: 0, controlBus: faderControlBus], target: group, addAction: \addToTail);
-        this.send2x2 = Synth(\send2x2, [in: trackAudioBus, out: sendAudioBus, controlBus: sendControlBus], target: mixer2x2, addAction: \addAfter);
+        this.mixer2x2 = Synth(\mixer2x2, [in: trackAudioBus, out: 0, pan: 0, controlBus: faderControlBus], target: this.group, addAction: \addToTail);
+        this.send2x2 = Synth(\send2x2, [in: trackAudioBus, out: sendAudioBus, controlBus: sendControlBus], target: this.mixer2x2, addAction: \addAfter);
     }   
 }

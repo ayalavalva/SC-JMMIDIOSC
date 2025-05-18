@@ -14,12 +14,12 @@ JMElementPotentiometer : JMMIDIElement {
         this.label2OSCpath = this.elementOSCpath ++ "_lb2";
         
         this.midiReceiver = JMMIDI14bitReceiver(this);
-        this.updateMidiValue;
+        this.prReceiveMidiValue;
 
         super.receiveOSCValuetoControlBus; // also receive values from OSC, updates the control bus and allows to get the OSC value in patch code
     }
 
-    sendBusValuetoOSClabel2 {
-        JMOSCManager.getSharedInstance.send(this.deviceOSCpath ++ this.label2OSCpath, (this.busValue * 100).asInteger);
+    prSendCtrlBusValuetoOSClabel2 {
+        JMOSCManager.getSharedInstance.send(this.deviceOSCpath ++ this.label2OSCpath, (this.controlBus.ctrlBusValue * 100).asInteger);
     }
 }

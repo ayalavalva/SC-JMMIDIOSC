@@ -1,5 +1,5 @@
 JMDAW {
-    var <>countAudioTrack, <>countSendTrack, <>postMIDIOSC;
+    var <>countAudioTrack, <>countSendTrack, <>postMIDIOSC; // [TODO] maybe postMIDIOSC is not needed as a variable in this class
     var <>midiControllers;
     var <>po16, <>en16, <>pbf41, <>pbf42;
     var <>tracks;
@@ -39,7 +39,9 @@ JMDAW {
         ^this.tracks.tracksDict[trackKey].fxGroup;
     }
 
-    // mehtod to get a faderControlBus by trackKey
+    // Not sure if these two methods below are used
+
+    // method to get a faderControlBus by trackKey
     faderControlBus { |trackKey|
         ^this.tracks.tracksDict[trackKey].faderControlBus;
     }

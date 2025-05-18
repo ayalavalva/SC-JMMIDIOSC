@@ -14,8 +14,8 @@ JMDAWSendTrack {
         this.number = number;
         this.trackAudioBus = sendAudioBus;
         this.group = Group.tail;
-        this.fxGroup = Group.head(group);
+        this.fxGroup = Group.head(this.group);
         this.faderControlBus = faderControlBus;
-        this.mixer2x2 = Synth(\mixer2x2, [in: sendAudioBus, out: 0, pan: 0, controlBus: faderControlBus], target: group, addAction: \addToTail);
+        this.mixer2x2 = Synth(\mixer2x2, [in: sendAudioBus, out: 0, pan: 0, controlBus: faderControlBus], target: this.group, addAction: \addToTail);
     }
 }

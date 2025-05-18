@@ -15,7 +15,7 @@ receiveMidiValue {
             "%_%%_lsb".format(this.element.deviceShortName, this.element.elementShortName, this.element.elementNumber),
             { |val| 
                 this.lsbCCValue = val;
-                this.createMidiCallback; 
+                this.createMidiCallback;
             },
             ccNum: this.element.lsbCC, chan: this.element.midiChannel
         );
@@ -24,5 +24,10 @@ receiveMidiValue {
     createMidiCallback {
         var midiValue = (this.msbCCValue << 7) + this.lsbCCValue;
         this.midiCallback.value(midiValue);  // notify listener
+    }
+
+    postMIDIElementDetails {
+        var commonDetails = (this.element.deviceFullName ++ (if (this.element.deviceShortName == "PBF4") {" (" ++ this.element.deviceNumb ++ ")"} {""}) + this.element.elementFullName + this.element.elementNumber + "MIDI Channel" + this.element.midiChannel);
+        (commonDetails + "msbCC" + this.element.msbCC + "lsbCC" + this.element.lsbCC ++ ":" + this.element.controlBus.ctrlBusValue).postln;
     }
 }

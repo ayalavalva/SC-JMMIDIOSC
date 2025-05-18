@@ -13,7 +13,7 @@ JMIntechPO16 : JMIntechController {
 
     var <>deviceOSCpath; // OSC path for the device
 
-    *new { |midiChannel=0, startCC=0, deviceOSCpath="/po16", oscServAddr="127.0.0.1", oscServPort=9000, postMIDIOSC=false|
+    *new { |midiChannel=0, startCC, deviceOSCpath="/po16", oscServAddr="127.0.0.1", oscServPort=9000, postMIDIOSC=false|
         this.classDeviceNumb = this.classDeviceNumb + 1; // Increment the classDeviceNumb to assign a unique number to this instance
         
         ^super.new.init("Intech Studio PO16", "PO16", midiChannel, oscServAddr, oscServPort, postMIDIOSC).initPO16(startCC, deviceOSCpath) // Call  superclass's init method

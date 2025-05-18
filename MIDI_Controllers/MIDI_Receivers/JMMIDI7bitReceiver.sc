@@ -16,4 +16,10 @@ JMMIDI7bitReceiver : JMMIDIReceiver {
     createMidiCallback {
         this.midiCallback.value(this.ccValue);  // notify listener
     }
+
+    postMIDIElementDetails {
+        var commonDetails = (this.element.deviceFullName ++ (if (this.element.deviceShortName == "PBF4") {" (" ++ this.element.deviceNumb ++ ")"} {""}) + this.element.elementFullName + this.element.elementNumber + "MIDI Channel" + this.element.midiChannel);
+
+        (commonDetails + "CC" + this.element.cc ++ ":" + this.element.controlBus.ctrlBusValue).postln;
+    }
 }

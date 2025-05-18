@@ -1,14 +1,12 @@
 JMDAWTrackManager {
-    var <>countMasterTrack = 1;
-    var <>countAudioTrack, <>countSendTrack, <>midiControllers;
+    var <>countMasterTrack = 1, <>countAudioTrack, <>countSendTrack;
+    var <>midiControllers; // [TODO] this variable is maybe not needed in this class
     var <>faderControlBusArray, <>sendControlBusArray; // Array of control busses for faders and sends
     var <>tracksArray; // Array of all tracks
-    var <>tracksDict; // Identity dictionary for all channels
+    var <>tracksDict; // Identity dictionary for all tracks
 
-    *new { |countAudioTrack = 6, countSendTrack = 1, midiControllers|
-        if (countAudioTrack + countSendTrack > 7) 
-        { "Too many audiotracks and sendtracks. Maximum is 7.".error; }
-        { ^super.new.init(countAudioTrack, countSendTrack, midiControllers); }
+    *new { |countAudioTrack, countSendTrack, midiControllers|
+        ^super.new.init(countAudioTrack, countSendTrack, midiControllers);
     }
 
     init { |countAudioTrack, countSendTrack, midiControllers|
@@ -16,29 +14,32 @@ JMDAWTrackManager {
         this.countSendTrack = countSendTrack;
         this.midiControllers = midiControllers;
 
+        // store the control bus index, not its current value
         this.faderControlBusArray = [
-            this.midiControllers.pbf41.fa1.cb, 
-            this.midiControllers.pbf41.fa2.cb, 
-            this.midiControllers.pbf41.fa3.cb, 
-            this.midiControllers.pbf41.fa4.cb, 
-            this.midiControllers.pbf42.fa1.cb, 
-            this.midiControllers.pbf42.fa2.cb, 
-            this.midiControllers.pbf42.fa3.cb, 
+            this.midiControllers.pbf41.fa1.cb,
+            this.midiControllers.pbf41.fa2.cb,
+            this.midiControllers.pbf41.fa3.cb,
+            this.midiControllers.pbf41.fa4.cb,
+            this.midiControllers.pbf42.fa1.cb,
+            this.midiControllers.pbf42.fa2.cb,
+            this.midiControllers.pbf42.fa3.cb,
             this.midiControllers.pbf42.fa4.cb
         ];
+
+        // likewise for send buses
         this.sendControlBusArray = [
-            this.midiControllers.pbf41.po1.cb, 
-            this.midiControllers.pbf41.po2.cb, 
-            this.midiControllers.pbf41.po3.cb, 
-            this.midiControllers.pbf41.po4.cb, 
-            this.midiControllers.pbf42.po1.cb, 
-            this.midiControllers.pbf42.po2.cb, 
-            this.midiControllers.pbf42.po3.cb, 
+            this.midiControllers.pbf41.po1.cb,
+            this.midiControllers.pbf41.po2.cb,
+            this.midiControllers.pbf41.po3.cb,
+            this.midiControllers.pbf41.po4.cb,
+            this.midiControllers.pbf42.po1.cb,
+            this.midiControllers.pbf42.po2.cb,
+            this.midiControllers.pbf42.po3.cb,
             this.midiControllers.pbf42.po4.cb
         ];
 
-        this.defineMixer2x2; // Add the mixer SynthDef
-        this.defineSend2x2; // Add the send SynthDef
+        this.prAddMixer2x2; // Add the mixer SynthDef
+        this.prAddSend2x2; // Add the send SynthDef
 
         this.tracksArray = Array.new;
         this.createAudioBusArrays; // Create audio busses for tracks and sends
@@ -47,7 +48,7 @@ JMDAWTrackManager {
         this.addTrackstoTracksDictionary;
     }
 
-    defineMixer2x2 {
+    prAddMixer2x2 {
         SynthDef(\mixer2x2, { |in, out, pan = 0, controlBus|
             var sig = In.ar(in, 2);
             var level = In.kr(controlBus, 1);
@@ -60,7 +61,7 @@ JMDAWTrackManager {
         Server.local.sync; // Ensure SynthDefs are compiled before proceeding
     }
     
-    defineSend2x2 {
+    prAddSend2x2 {
         SynthDef(\send2x2, { |in, out, controlBus|
             var sig = In.ar(in, 2);
             var level = In.kr(controlBus, 1);
@@ -72,12 +73,12 @@ JMDAWTrackManager {
     }
 
     createAudioBusArrays {
-        var trackAudioBusArray = Array.fill(this.countAudioTrack + this.countSendTrack, { Bus.audio(Server.local, 2) });
+        var trackAudioBusArray = Array.fill(this.countAudioTrack, { Bus.audio(Server.local, 2) });
         var sendAudioBusArray = Array.fill(this.countSendTrack, { Bus.audio(Server.local, 2) });
 
-        this.addAudioTracksToArray(trackAudioBusArray, sendAudioBusArray); // Problem when more than 1 send track !!!!!
+        this.addAudioTracksToArray(trackAudioBusArray, sendAudioBusArray); // [TODO] Problem when more than 1 send track !!!!!
         this.addSendTracksToArray(sendAudioBusArray);
-        this.addMasterTracksToArray;
+        this.addMasterTrackToArray;
     }
 
     addAudioTracksToArray { |trackAudioBusArray, sendAudioBusArray|
@@ -104,7 +105,7 @@ JMDAWTrackManager {
     }
 
     // Add master tracks to the existing array
-    addMasterTracksToArray {
+    addMasterTrackToArray {
         this.countMasterTrack.do { |i| 
             var faderControlBus = this.faderControlBusArray[i];
             var masterTrack = JMDAWMasterTrack.new(faderControlBus: faderControlBus);
@@ -113,7 +114,7 @@ JMDAWTrackManager {
     }
     
     addTrackstoTracksDictionary {
-        this.tracksArray.do { |track, index|
+        this.tracksArray.do { |track|
             var trackKey = track.name.toLower.asSymbol;
             this.tracksDict.put(trackKey, track);
         };

@@ -13,16 +13,11 @@ JMElementButton : JMMIDIElement {
         this.label2OSCpath = this.elementOSCpath ++ "_lb2";
 
         this.midiReceiver = JMMIDI7bitReceiver.new(this);
-        this.updateMidiValue;
+        this.prReceiveMidiValue;
         
         super.receiveOSCValuetoControlBus; // also receive values from OSC, updates the control bus and allows to get the OSC value in patch code
     }
 
-    convertMidiValueToNormalizedControlBusValue { |midiValue|
-        this.busValue = this.midiValue.linlin(0, 127, this.lowValue, this.highValue);
-    }
-
-
-    sendBusValuetoOSClabel2 {
+    prSendCtrlBusValuetoOSClabel2 {
     }
 }

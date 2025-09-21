@@ -25,7 +25,7 @@ JMIntechController {
         };
     }
 
-    // Sends OSC messages for specified element keys, using the provided OSC path and value.
+    // Patch public method to send OSC messages for specified element keys, using the provided OSC path and value.
     sendtoOSClabel1 { |args|
         args.keysValuesDo({ |element, value|
             this.perform(element).sendtoOSClabel1(value);
